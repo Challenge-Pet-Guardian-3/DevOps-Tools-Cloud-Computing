@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.4" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="PetGuardian.Application\obj\PetGuardian.Application.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="PetGuardian.Application\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="PetGuardian.Application\obj\project.packagespec.json" />
+      <_ContentIncludedByDefault Remove="PetGuardian.Infrastructure\obj\PetGuardian.Infrastructure.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="PetGuardian.Infrastructure\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="PetGuardian.Infrastructure\obj\project.packagespec.json" />
+    </ItemGroup>
+
+</Project>
