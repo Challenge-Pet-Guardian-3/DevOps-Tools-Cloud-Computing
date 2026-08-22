@@ -2,6 +2,8 @@
 
 > **Projeto:** Pet Guardian (Challenge Clyvo 2026 — 2º Semestre)  
 > **Disciplina:** DevOps Tools & Cloud Computing (FIAP — 2TDSPG)  
+> **Aplicação Escolhida para Deploy:** **Advanced Business Development with .NET (ASP.NET Core)**  
+> **Banco de Dados em Nuvem:** **Oracle Database em Container (ACI com Volume)**  
 > **Referência Oficial:** Manual do Challenge 2026 — Páginas 10 a 16  
 > **Formato:** Scrum / Azure DevOps (Azure Boards)  
 
@@ -9,18 +11,19 @@
 
 ## 🎯 1. Diagnóstico dos Requisitos da Sprint 3 (Páginas 10 a 16)
 
-Na Sprint 3, a disciplina de **DevOps Tools & Cloud Computing** exige a **evolução completa da infraestrutura em nuvem (Azure)**. A abordagem baseada em Máquina Virtual (VM) da Sprint 1 foi **descontinuada**. O grupo deve escolher e implementar **uma de duas opções arquiteturais puras**, com rigorosa proibição de misturar tecnologias.
+Na Sprint 3, a disciplina de **DevOps Tools & Cloud Computing** exige a **evolução completa da infraestrutura em nuvem (Azure)**. A abordagem baseada em Máquina Virtual (VM) da Sprint 1 foi **descontinuada**. A equipe selecionou a **Opção 1 (ACR + ACI)** com a aplicação em **.NET**, em estrita conformidade com as regras arquiteturais:
 
 ### ⚖️ Comparativo de Opções e Regras Arquiteturais
 
-| Critério | Opção 1: ACR + ACI (Recomendada) | Opção 2: Azure App Service + Banco PaaS |
+| Critério | Opção 1: ACR + ACI (Implementada pelo Grupo) | Opção 2: Azure App Service + Banco PaaS |
 | :--- | :--- | :--- |
+| **Aplicação Alvo** | **.NET ASP.NET Core API (`PetGuardian.API`)** | Não aplicável |
 | **Computação da Aplicação** | **Azure Container Instances (ACI)** executando imagem do ACR | **Azure App Service** (Deploy nativo de código / pacote) |
 | **Registro de Imagens** | **Azure Container Registry (ACR)** obrigatório | Não aplicável |
-| **Banco de Dados em Nuvem** | **Container de Banco no ACI** (Oracle XE / Postgres / MySQL) com volume | **Banco PaaS Gerenciado** (Azure SQL PaaS / MySQL PaaS / Oracle FIAP) |
-| **Uso de Containers** | **100% Containerizado** (App E Banco em containers) | **0% Containerizado** (NADA pode ser container) |
-| **Provisionamento** | **100% via Azure CLI** (`az group`, `az acr`, `az container`) | **100% via Azure CLI** (`az group`, `az appservice`, `az webapp`, `az sql`) |
-| **Segurança do Container** | Container do App **NÃO PODE rodar como root/admin** (`USER appuser`) | Não aplicável |
+| **Banco de Dados em Nuvem** | **Container de Banco no ACI** (Oracle Database) com volume Azure Files | **Banco PaaS Gerenciado** (Azure SQL PaaS / Oracle FIAP) |
+| **Uso de Containers** | **100% Containerizado** (App .NET E Banco Oracle em containers) | **0% Containerizado** (NADA pode ser container) |
+| **Provisionamento** | **100% via Azure CLI** (`az group`, `az acr`, `az container`) | **100% via Azure CLI** (`az group`, `az appservice`, `az sql`) |
+| **Segurança do Container** | Container do App .NET **NÃO PODE rodar como root/admin** (`USER appuser`) | Não aplicável |
 | **Penalidade por Misturar** | **-40 pontos** se usar App no ACI com Banco PaaS ou sem container | **-40 pontos** se containerizar App ou Banco |
 
 ---
@@ -29,23 +32,23 @@ Na Sprint 3, a disciplina de **DevOps Tools & Cloud Computing** exige a **evolu�
 
 Ao analisar a pasta herdada da Sprint 1, foram identificados os seguintes itens que **devem ser descartados, substituídos ou refatorados**:
 
-```
+```text
 [ESTADO ATUAL DO REPOSITÓRIO (SPRINT 1)]       ➔       [ESTADO ALVO (SPRINT 3 - ACR + ACI)]
-❌ azure-cli-script.sh (Criação de VM Linux)           ✨ azure-cli-sprint3-acr-aci.sh (Provisiona ACR, ACI App e ACI DB)
+❌ azure-cli-script.sh (Criação de VM Linux)           ✨ azure-cli-sprint3-acr-aci.sh (Provisiona ACR, ACI .NET e ACI Oracle)
 ❌ draw_macro.png (Arquitetura com VM Ubuntu)          ✨ docs/arquitetura_cloud_azure.png (Diagrama Oficial de Cloud Azure)
 ❌ Sem usuário não-root no Dockerfile                 ✨ Dockerfile multi-stage com USER appuser (Segurança non-root)
-❌ Sem script DDL segregado                           ✨ script_bd.sql (DDL completo com comentários das 2+ tabelas core)
-❌ Endpoints PUT ausentes no CRUD da API              ✨ CRUD completo funcional em 2+ tabelas core conectadas
+❌ Sem script DDL segregado                           ✨ script_bd.sql (DDL completo com comentários das tabelas Pet e Atendimento)
+❌ Endpoints PUT ausentes no CRUD da API              ✨ CRUD .NET completo funcional com PUT, GET, POST e DELETE
 ```
 
 ### 🗑️ O que APAGAR / SUBSTITUIR:
 1. **`azure-cli-script.sh` (Sprint 1):** APAGAR/SUBSTITUIR. Ele executa `az vm create`, `apt-get install docker`, etc. Na Sprint 3, **não se usa VM**.
 2. **`docs/draw_macro.png` (Sprint 1):** SUBSTITUIR. O diagrama antigo ilustra uma VM e fluxo genérico. O professor penaliza em **-20 pontos** diagramas em formato de fluxo/UML/TOGAF.
-3. **`docs/Documentação DevOps - Pet Guardian.pdf` (Sprint 1):** SUBSTITUIR pelo novo PDF de entrega da Sprint 3 (folha de rosto contendo estritamente nome/RM dos integrantes, link do GitHub e link do YouTube).
+3. **`docs/Documentação DevOps - Pet Guardian.pdf` (Sprint 1):** SUBSTITUIR pelo novo PDF de entrega da Sprint 3 (folha de rosto contendo estritamente nome/RM dos integrantes em ordem alfabética, link do GitHub e link do YouTube).
 
 ### 🛠️ O que MANTER e REFATORAR:
-1. **Código-fonte da API (`PetGuardian/`):** Manter e garantir que o CRUD das entidades core (`Pet` e `Atendimento` / `Usuario`) esteja 100% funcional com `GET`, `POST`, `PUT` e `DELETE`.
-2. **`Dockerfile`:** Atualizar para criar e trocar para usuário não privilegiado (`USER appuser` ou `USER app`).
+1. **Código-fonte da API .NET (`PetGuardian/`):** Manter e garantir que o CRUD das entidades core (`Pet`, `Atendimento`, `Usuario`, `Tarefa`) esteja 100% funcional com `GET`, `POST`, `PUT` e `DELETE`.
+2. **`Dockerfile` (.NET):** Atualizar para criar e trocar para usuário não privilegiado (`USER appuser`).
 3. **`README.md`:** Reformular completamente com: Descrição da Solução, Benefícios para o Negócio, Diagrama com Ícones Oficiais Azure, Passo a Passo (How To) de Deploy via Azure CLI, Comandos Docker (`build`, `push`, `run`), e Scripts de Consulta SQL (`SELECT`) para evidência no vídeo.
 
 ---
@@ -58,44 +61,44 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 * **Ícones Oficiais da Microsoft Azure:**
   * Azure Resource Group (`rg-petguardian-sprint3`)
   * Azure Container Registry (`acrpetguardian`)
-  * Azure Container Instances — API (`aci-petguardian-api` na porta 8080)
-  * Azure Container Instances — Banco de Dados (`aci-petguardian-db` na porta 1521 ou 5432) com Azure Files Share Volume
+  * Azure Container Instances — API .NET (`aci-petguardian-api` na porta 8080)
+  * Azure Container Instances — Banco de Dados Oracle (`aci-petguardian-db` na porta 1521) com Azure Files Share Volume
   * Virtual Network (VNet) / Subnet / Network Security Group (NSG)
 * **Personas Identificadas:**
-  * 🧑‍💻 *Desenvolvedor / DevOps:* Execução do Azure CLI, Build da imagem Docker e Push para o ACR.
+  * 🧑‍💻 *Desenvolvedor / DevOps:* Execução do Azure CLI, Build da imagem Docker .NET e Push para o ACR.
   * 📱 *Tutor / Veterinário (Usuário Final):* Requisições HTTP/REST e Swagger UI.
 * **Setas de Fluxo Numeradas:**
-  1. `[1]` DevOps executa script Azure CLI e provisiona o Resource Group, ACR, ACI de Banco e ACI da API.
-  2. `[2]` Build da imagem da aplicação .NET/Java e `docker push` para o repositório privado no ACR.
+  1. `[1]` DevOps executa script Azure CLI e provisiona o Resource Group, ACR, ACI de Banco e ACI da API .NET.
+  2. `[2]` Build da imagem da aplicação .NET (`docker build`) e `docker push` para o repositório privado no ACR.
   3. `[3]` ACI faz o pull seguro da imagem armazenada no ACR via credenciais de admin gerenciadas.
-  4. `[4]` Container da API se comunica internamente na rede/IP com o Container do Banco de Dados no ACI.
-  5. `[5]` Usuário/Cliente consome a API através do IP público/FQDN na porta 8080.
+  4. `[4]` Container da API .NET se comunica internamente na rede/IP com o Container do Banco de Dados Oracle no ACI.
+  5. `[5]` Usuário consome a API através do IP público/FQDN na porta 8080.
   6. `[6]` Mutações de dados persistem no volume montado do Azure Files.
 
 ---
 
 ## 👑 4. Estrutura do Backlog no Azure Boards (Scrum)
 
-```
-[EPIC-03] Sprint 3 - DevOps Tools & Cloud Computing: Arquitetura em Nuvem Serverless Containerizada (ACR + ACI)
+```text
+[EPIC-03] Sprint 3 - DevOps Tools & Cloud Computing: Arquitetura em Nuvem Serverless Containerizada (.NET no ACR + ACI)
 │
-├── [FEAT-01] Engenharia de Containers & Segurança da Aplicação (.NET / Java)
-│   ├── [PBI-01] Refatoração do Dockerfile Multi-Stage com Usuário Sem Privilégios (Non-Root)
-│   ├── [PBI-02] Segregação do DDL do Banco Core com Comentários (script_bd.sql)
-│   └── [PBI-03] Validação e Ajuste do CRUD de 2+ Entidades Relacionadas com Conteúdo Significativo
+├── 🧹 [FEAT-01] Engenharia de Containers & Segurança da Aplicação .NET
+│   ├── [PBI-01] Refatoração do Dockerfile Multi-Stage .NET com Usuário Sem Privilégios (Non-Root) (3 pts)
+│   ├── [PBI-02] Segregação do DDL do Banco Core com Comentários (script_bd.sql) (2 pts)
+│   └── [PBI-03] Validação e Ajuste do CRUD .NET de 2+ Entidades Relacionadas com PUT e Persistência (3 pts)
 │
-├── [FEAT-02] Infraestrutura como Código (IaC) via Azure CLI
-│   ├── [PBI-04] Script Azure CLI para Provisionamento do Resource Group e Azure Container Registry (ACR)
-│   ├── [PBI-05] Script Azure CLI para Provisionamento do Container de Banco de Dados no ACI com Volume
-│   └── [PBI-06] Script Azure CLI para Build, Push e Deploy do Container da Aplicação no ACI
+├── ⚙️ [FEAT-02] Infraestrutura como Código (IaC) via Azure CLI
+│   ├── [PBI-04] Script Azure CLI para Provisionamento do Resource Group e Azure Container Registry (ACR) (3 pts)
+│   ├── [PBI-05] Script Azure CLI para Provisionamento do Container de Banco Oracle no ACI com Volume (5 pts)
+│   └── [PBI-06] Script Azure CLI para Build, Push e Deploy do Container .NET no ACI (5 pts)
 │
-├── [FEAT-03] Arquitetura de Nuvem, Documentação Técnica e Repositório GitHub
-│   ├── [PBI-07] Elaboração do Diagrama Macro de Arquitetura Cloud Azure com Ícones Oficiais e Fluxos
-│   └── [PBI-08] Reestruturação Completa do README.md (How-To, Comandos, Benefícios e DDL)
+├── ☁️ [FEAT-03] Arquitetura de Nuvem, Documentação Técnica e Repositório GitHub
+│   ├── [PBI-07] Elaboração do Diagrama Macro de Arquitetura Cloud Azure com Ícones Oficiais e Fluxos (5 pts)
+│   └── [PBI-08] Reestruturação Completa do README.md (How-To, Comandos, Benefícios e DDL) (5 pts)
 │
-└── [FEAT-04] Roteiro de Demonstração, Gravação do Vídeo sem Cortes e Entrega Oficial
-    ├── [PBI-09] Roteiro e Execução dos Testes com Evidência de Persistência no Banco via SELECT
-    └── [PBI-10] Gravação do Vídeo Explicativo por Voz (720p+) e Geração do PDF Oficial da Entrega
+└── 📹 [FEAT-04] Roteiro de Demonstração, Gravação do Vídeo sem Cortes e Entrega Oficial
+    ├── [PBI-09] Roteiro e Execução dos Testes com Evidência de Persistência no Banco via SELECT (3 pts)
+    └── [PBI-10] Gravação do Vídeo Explicativo por Voz (720p+) e Geração do PDF Oficial da Entrega (5 pts)
 ```
 
 ---
@@ -104,16 +107,16 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 | ID | Título do Item de Backlog (PBI) | Feature Pai | Story Points | Prioridade | Horas Estimadas |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| **PBI-01** | Dockerfile Multi-Stage com Usuário Non-Root | `[FEAT-01]` Containers & App | 3 pts | 1 - Critical | 4h |
-| **PBI-02** | DDL Estruturado com Comentários (`script_bd.sql`) | `[FEAT-01]` Containers & App | 2 pts | 1 - Critical | 2h |
-| **PBI-03** | Validação do CRUD de 2+ Tabelas Core Relacionadas | `[FEAT-01]` Containers & App | 3 pts | 1 - Critical | 4h |
-| **PBI-04** | Script Azure CLI para Resource Group e ACR | `[FEAT-02]` Azure CLI IaC | 3 pts | 1 - Critical | 3h |
-| **PBI-05** | Script Azure CLI para Deploy do Banco de Dados no ACI | `[FEAT-02]` Azure CLI IaC | 5 pts | 1 - Critical | 5h |
-| **PBI-06** | Script Azure CLI para Deploy da API no ACI | `[FEAT-02]` Azure CLI IaC | 5 pts | 1 - Critical | 5h |
-| **PBI-07** | Diagrama de Arquitetura Cloud Azure (Visual Paradigm/Draw.io) | `[FEAT-03]` Arquitetura & Docs | 5 pts | 1 - Critical | 5h |
-| **PBI-08** | README.md Completo com How-To, Benefícios e Comandos | `[FEAT-03]` Arquitetura & Docs | 5 pts | 1 - Critical | 4h |
-| **PBI-09** | Bateria de Testes do CRUD com Validação por SELECT | `[FEAT-04]` Vídeo & Entrega | 3 pts | 1 - Critical | 4h |
-| **PBI-10** | Gravação do Vídeo sem Cortes e PDF Oficial de Entrega | `[FEAT-04]` Vídeo & Entrega | 5 pts | 1 - Critical | 6h |
+| **PBI-01** | Dockerfile Multi-Stage .NET com Usuário Non-Root | `[FEAT-01]` Containers & App | **3 pts** | 1 - Critical | 4h |
+| **PBI-02** | DDL Estruturado com Comentários (`script_bd.sql`) | `[FEAT-01]` Containers & App | **2 pts** | 1 - Critical | 2h |
+| **PBI-03** | Validação do CRUD .NET de 2+ Tabelas Core c/ PUT | `[FEAT-01]` Containers & App | **3 pts** | 1 - Critical | 4h |
+| **PBI-04** | Script Azure CLI para Resource Group e ACR | `[FEAT-02]` Azure CLI IaC | **3 pts** | 1 - Critical | 3h |
+| **PBI-05** | Script Azure CLI para Deploy do Banco Oracle no ACI | `[FEAT-02]` Azure CLI IaC | **5 pts** | 1 - Critical | 5h |
+| **PBI-06** | Script Azure CLI para Deploy da API .NET no ACI | `[FEAT-02]` Azure CLI IaC | **5 pts** | 1 - Critical | 5h |
+| **PBI-07** | Diagrama de Arquitetura Cloud Azure (Visual Paradigm/Draw.io) | `[FEAT-03]` Arquitetura & Docs | **5 pts** | 1 - Critical | 5h |
+| **PBI-08** | README.md Completo com How-To, Benefícios e Comandos | `[FEAT-03]` Arquitetura & Docs | **5 pts** | 1 - Critical | 4h |
+| **PBI-09** | Bateria de Testes do CRUD com Validação por SELECT | `[FEAT-04]` Vídeo & Entrega | **3 pts** | 1 - Critical | 4h |
+| **PBI-10** | Gravação do Vídeo sem Cortes e PDF Oficial de Entrega | `[FEAT-04]` Vídeo & Entrega | **5 pts** | 1 - Critical | 6h |
 | **TOTAL** | **10 PBIs / 25 Child Tasks** | **4 Features / 1 Epic** | **39 pts** | — | **42h** |
 
 ---
@@ -122,25 +125,24 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-01] Refatoração do Dockerfile Multi-Stage com Usuário Sem Privilégios (Non-Root)
+### 🔹 [PBI-01] Refatoração do Dockerfile Multi-Stage .NET com Usuário Sem Privilégios (Non-Root)
 * **Work Item Type:** `Product Backlog Item`
-* **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação`
+* **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação .NET`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `3`
-* **Tags:** `DevOps`, `Docker`, `Security`, `Non-Root`, `Sprint3`
+* **Tags:** `DevOps`, `Docker`, `DotNet`, `Security`, `Non-Root`, `Sprint3`
 
 #### Descrição (História de Usuário)
 > **Como** engenheiro DevOps,  
-> **Eu quero** criar e otimizar o `Dockerfile` multi-stage da aplicação configurando um usuário não privilegiado (`USER appuser`),  
+> **Eu quero** criar e otimizar o `Dockerfile` multi-stage da aplicação .NET configurando um usuário não privilegiado (`USER appuser`),  
 > **Para que** a imagem containerizada execute em conformidade com as práticas de segurança em nuvem e atenda à exigência estrita do manual da Sprint 3 (evitando desconto de até -10 pts).
 
 #### Critérios de Aceite (Acceptance Criteria)
-- [ ] Build multi-stage implementado com estágios claros (`base`, `build`, `publish`, `final`).
+- [ ] Build multi-stage implementado no `Dockerfile` com estágios claros (`base`, `build`, `publish`, `final`).
 - [ ] Criação explícita de usuário e grupo sem permissões administrativas (`RUN adduser --disabled-password --gecos "" appuser`).
-- [ ] Troca de contexto no estágio final com `USER appuser` (não rodar como `root` ou `admin`).
-- [ ] Permissões de escrita e leitura configuradas corretamente nos diretórios necessários da aplicação.
-- [ ] Imagem gerada e testada localmente executando com sucesso e respondendo na porta exposta (8080).
+- [ ] Instrução `USER appuser` declarada antes do `ENTRYPOINT`.
+- [ ] Container compila e executa sem erros de permissão na porta 8080.
 
 #### Tarefas Técnicas (Child Tasks)
 * **Task 1.1:** Ajustar estágios do `Dockerfile` para .NET 8/10 ou Java com multi-stage build. *(Estimativa: 2h)*
@@ -152,18 +154,18 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-02] Segregação do DDL do Banco Core com Comentários (`script_bd.sql`)
+### 🔹 [PBI-02] Segregação do DDL do Banco Core com Comentários (script_bd.sql)
 * **Work Item Type:** `Product Backlog Item`
-* **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação`
+* **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação .NET`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `2`
-* **Tags:** `DevOps`, `Database`, `DDL`, `Oracle`, `Sprint3`
+* **Tags:** `DevOps`, `Oracle`, `DDL`, `Database`, `Sprint3`
 
 #### Descrição (História de Usuário)
 > **Como** arquiteto de banco de dados,  
-> **Eu quero** criar o arquivo `script_bd.sql` contendo o DDL das tabelas que compõem o core da aplicação com estrutura completa e comentários,  
-> **Para que** os avaliadores possam auditar a modelagem relacional de forma isolada, evitando a penalidade de -10 pontos.
+> **Eu quero** gerar um arquivo de script DDL isolado chamado `script_bd.sql` contendo a definição e comentários das tabelas core (`PET`, `ATENDIMENTO`, `USUARIO`),  
+> **Para que** a infraestrutura do banco seja recriada facilmente no container e cumpra o requisito obrigatório da página 11 do manual (desconto de -10 pts evitado).
 
 #### Critérios de Aceite (Acceptance Criteria)
 - [ ] Arquivo `script_bd.sql` criado na raiz do repositório da disciplina de DevOps.
@@ -179,33 +181,27 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-03] Validação e Ajuste do CRUD de 2+ Entidades Relacionadas com Conteúdo Significativo
+### 🔹 [PBI-03] Validação e Ajuste do CRUD .NET de 2+ Entidades Relacionadas com PUT e Persistência
 * **Work Item Type:** `Product Backlog Item`
-* **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação`
+* **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação .NET`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `3`
-* **Tags:** `DevOps`, `Backend`, `CRUD`, `REST`, `Sprint3`
+* **Tags:** `DevOps`, `DotNet`, `API`, `CRUD`, `Oracle`, `Sprint3`
 
 #### Descrição (História de Usuário)
-> **Como** desenvolvedor backend,  
-> **Eu quero** garantir que a aplicação disponibilize operações completas de CRUD (`GET`, `POST`, `PUT`, `DELETE`) em pelo menos 2 tabelas relacionadas entre si, com massa de dados de no mínimo 2 registros válidos,  
-> **Para que** possamos executar a demonstração completa exigida pelas regras 4 e 5 da disciplina.
+> **Como** desenvolvedor e integrador,  
+> **Eu quero** validar que a API .NET conectada ao banco Oracle possua operações completas de `Create`, `Read`, `Update` (`PUT`) e `Delete` em tabelas relacionadas,  
+> **Para que** todas as operações possam ser demonstradas e comprovadas via queries `SELECT` durante o vídeo de avaliação.
 
 #### Critérios de Aceite (Acceptance Criteria)
-- [ ] Pelo menos 2 tabelas relacionadas contempladas no CRUD (ex: `Pet` e `Atendimento`).
-- [ ] Todas as 4 operações HTTP implementadas e testáveis via Swagger / Postman / cURL:
-  - Inclusão (`POST`) gerando chave e persistindo no banco;
-  - Consulta (`GET` por ID e `GET` paginado/lista);
-  - Alteração (`PUT`) atualizando campos significativos;
-  - Exclusão (`DELETE`) com integridade referencial.
-- [ ] Mínimo de 2 registros com conteúdo significativo inseridos e manipulados durante a demonstração.
+- [ ] CRUD 100% funcional sobre as entidades `Pet` e `Atendimento` (ou `Usuario`).
+- [ ] Endpoints `POST`, `GET`, `PUT` e `DELETE` operando sem erros e persistindo no banco Oracle.
+- [ ] Inserção e manipulação de pelo menos 2 registros com conteúdo significativo.
 
 #### Tarefas Técnicas (Child Tasks)
-* **Task 3.1:** Validar endpoints de `POST`, `GET`, `PUT` e `DELETE` para `Pet` e `Atendimento`. *(Estimativa: 2h)*
-  * *Descrição:* Verificar o funcionamento dos controllers e a persistência real no banco de dados.
-* **Task 3.2:** Preparar payloads JSON de teste com dados reais para o vídeo demonstrativo. *(Estimativa: 2h)*
-  * *Descrição:* Criar coleção de requisições prontas para executar no Swagger e no terminal.
+* **Task 3.1:** Testar rotas de CRUD completo da API .NET no Swagger e Postman. *(Estimativa: 2h)*
+* **Task 3.2:** Validar persistência física das alterações no banco Oracle com consultas SQL. *(Estimativa: 2h)*
 
 ---
 
@@ -215,75 +211,61 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `3`
-* **Tags:** `DevOps`, `Azure-CLI`, `ACR`, `IaC`, `Sprint3`
+* **Tags:** `DevOps`, `AzureCLI`, `ACR`, `IaC`, `Cloud`, `Sprint3`
 
 #### Descrição (História de Usuário)
 > **Como** engenheiro de nuvem,  
-> **Eu quero** desenvolver um script em Azure CLI que crie o Resource Group e provisione o Azure Container Registry (ACR) com SKU Basic e admin habilitado,  
-> **Para que** tenhamos um repositório corporativo e seguro para hospedar as imagens da aplicação na nuvem Azure.
+> **Eu quero** criar um script shell automatizado em Azure CLI para criar o Resource Group e o registro privado Azure Container Registry (ACR),  
+> **Para que** a infraestrutura base de nuvem seja provisionada de forma reproduzível em linha de comando.
 
 #### Critérios de Aceite (Acceptance Criteria)
-- [ ] Script em Shell/Bash com tratamento de erros (`set -e`) e variáveis padronizadas.
-- [ ] Execução com sucesso do comando `az group create --name <RG> --location <LOCATION>`.
-- [ ] Execução com sucesso do comando `az acr create --resource-group <RG> --name <ACR_NAME> --sku Basic --admin-enabled true`.
-- [ ] Script idempotente ou com mensagens informativas de progresso.
-- [ ] Sem credenciais ou senhas fixas expostas no script (uso de variáveis e consulta dinâmica).
+- [ ] Comandos `az group create --name rg-petguardian-sprint3 --location eastus`.
+- [ ] Comando `az acr create --resource-group rg-petguardian-sprint3 --name acrpetguardian --sku Basic --admin-enabled true`.
+- [ ] Script documentado com comentários explicando cada parâmetro.
 
 #### Tarefas Técnicas (Child Tasks)
-* **Task 4.1:** Estruturar arquivo de script `azure-cli-deploy.sh` com cabeçalho e variáveis. *(Estimativa: 1h)*
-  * *Descrição:* Definir nomes de recursos (`rg-petguardian-sprint3`, `acrpetguardian2026`, etc.).
-* **Task 4.2:** Implementar comandos de criação do Resource Group e do ACR. *(Estimativa: 1h)*
-  * *Descrição:* Validar sintaxe e parâmetros do Azure CLI para criação do registry.
-* **Task 4.3:** Adicionar rotina de obtenção dinâmica de credenciais do ACR (`az acr credential show`). *(Estimativa: 1h)*
-  * *Descrição:* Extrair usuário e senha do registry sem expor dados no repositório público.
+* **Task 4.1:** Escrever comandos de criação do Resource Group e ACR em `azure-cli-sprint3-acr-aci.sh`. *(Estimativa: 1.5h)*
+* **Task 4.2:** Testar execução do script na assinatura Azure e autenticação no ACR. *(Estimativa: 1.5h)*
 
 ---
 
-### 🔹 [PBI-05] Script Azure CLI para Deploy do Container de Banco de Dados no ACI com Volume
+### 🔹 [PBI-05] Script Azure CLI para Provisionamento do Container de Banco Oracle no ACI com Volume
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-02] Infraestrutura como Código (IaC) via Azure CLI`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `5`
-* **Tags:** `DevOps`, `Azure-CLI`, `ACI`, `Database-Container`, `Sprint3`
+* **Tags:** `DevOps`, `AzureCLI`, `ACI`, `Oracle`, `VolumeStorage`, `Sprint3`
 
 #### Descrição (História de Usuário)
-> **Como** engenheiro de infraestrutura,  
-> **Eu quero** criar via Azure CLI a instância de container (ACI) para o banco de dados (Oracle XE / Postgres) com volume persistente (Azure File Share),  
-> **Para que** a solução cumpra o requisito de 100% de containerização do banco na nuvem sem perder dados após reinicializações.
+> **Como** arquiteto de infraestrutura,  
+> **Eu quero** provisionar um container de banco de dados Oracle no Azure Container Instances com volume montado no Azure Storage Account,  
+> **Para que** o banco execute 100% containerizado sem violar a regra de mistura de opções da Sprint 3.
 
 #### Critérios de Aceite (Acceptance Criteria)
-- [ ] Criação de Azure Storage Account e Azure File Share via Azure CLI (`az storage share create`).
-- [ ] Deploy do container do Banco de Dados no ACI via comando `az container create`:
-  - Imagem do banco (ex: `gvenzl/oracle-xe:21-slim` ou `postgres:15-alpine`);
-  - Definição de CPU (1 a 2 cores) e Memória (2GB a 4GB);
-  - Porta de banco exposta (1521 ou 5432) com IP público ou DNS name;
-  - Montagem do volume persistente do Azure File Share;
-  - Variáveis de ambiente de inicialização configuradas de forma segura.
-- [ ] Teste de conectividade e execução do script `script_bd.sql` no banco containerizado na nuvem.
+- [ ] Criação de Storage Account e File Share via CLI (`az storage account create`, `az storage share create`).
+- [ ] Deploy do container de banco no ACI com `az container create` montando o volume de arquivos para persistência.
+- [ ] Porta do banco exposta internamente na VNet/IP para acesso da aplicação .NET.
 
 #### Tarefas Técnicas (Child Tasks)
-* **Task 5.1:** Criar comandos Azure CLI para Storage Account e File Share para persistência de volume. *(Estimativa: 2h)*
-  * *Descrição:* Provisionar o compartilhamento SMB para montar no container do banco.
-* **Task 5.2:** Implementar comando `az container create` para o Banco de Dados. *(Estimativa: 2h)*
-  * *Descrição:* Configurar limites de recursos, portas e variáveis de ambiente no ACI.
-* **Task 5.3:** Validar conexão externa com o banco no ACI e aplicar o `script_bd.sql`. *(Estimativa: 1h)*
-  * *Descrição:* Testar conexão via DBeaver / SQL Developer / psql contra o IP público do ACI.
+* **Task 5.1:** Criar comandos de storage account e file share para persistência do banco. *(Estimativa: 2h)*
+* **Task 5.2:** Escrever comando `az container create` para o banco Oracle com variáveis de ambiente. *(Estimativa: 2h)*
+* **Task 5.3:** Validar conectividade e inicialização do banco de dados no container. *(Estimativa: 1h)*
 
 ---
 
-### 🔹 [PBI-06] Script Azure CLI para Build, Push e Deploy do Container da Aplicação no ACI
+### 🔹 [PBI-06] Script Azure CLI para Build, Push e Deploy do Container .NET no ACI
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-02] Infraestrutura como Código (IaC) via Azure CLI`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `5`
-* **Tags:** `DevOps`, `Azure-CLI`, `ACI`, `ACR`, `App-Deploy`, `Sprint3`
+* **Tags:** `DevOps`, `AzureCLI`, `ACI`, `DockerDeploy`, `DotNet`, `Sprint3`
 
 #### Descrição (História de Usuário)
-> **Como** engenheiro de automação,  
-> **Eu quero** criar a rotina de build/push da imagem para o ACR e realizar o deploy do container da API no ACI via Azure CLI,  
-> **Para que** a aplicação execute na nuvem com alta disponibilidade, conectada ao container do banco e acessível publicamente.
+> **Como** engenheiro DevOps,  
+> **Eu quero** automatizar o build da imagem .NET no ACR (`az acr build`) e o provisionamento do container da aplicação no ACI com IP público e variáveis de conexão,  
+> **Para que** a API .NET fique acessível publicamente na internet e conectada ao container de banco.
 
 #### Critérios de Aceite (Acceptance Criteria)
 - [ ] Autenticação no ACR via `az acr login` ou `docker login`.
@@ -306,31 +288,31 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-07] Elaboração do Diagrama Macro de Arquitetura Cloud Azure com Ícones Oficiais e Fluxos
+### 🔹 [PBI-07] Elaboração do Diagrama Macro de Arquitetura Cloud Azure com Ícones Oficiais
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-03] Arquitetura de Nuvem, Documentação Técnica e Repositório GitHub`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `5`
-* **Tags:** `DevOps`, `Architecture`, `Azure-Diagram`, `Draw.io`, `Sprint3`
+* **Tags:** `DevOps`, `ArchitectureDiagram`, `Drawio`, `AzureIcons`, `Sprint3`
 
 #### Descrição (História de Usuário)
-> **Como** arquiteto de soluções cloud,  
-> **Eu quero** desenhar o diagrama de arquitetura da solução no Draw.io/Visual Paradigm utilizando a biblioteca oficial de ícones da Azure, setas numeradas e personas,  
-> **Para que** a entrega atenda 100% ao critério de arquitetura (20 pontos) e evite a penalidade de -20 pontos para diagramas em formato inadequado.
+> **Como** arquiteto de soluções em nuvem,  
+> **Eu quero** criar o diagrama de arquitetura Azure oficial no Draw.io / Visual Paradigm com ícones Microsoft, personas e fluxos numerados,  
+> **Para que** a solução atenda rigorosamente ao critério da página 13 e 15 (evitando a penalidade de -20 pts para diagramas em formato de fluxo ou UML).
 
 #### Critérios de Aceite (Acceptance Criteria)
 - [ ] Diagrama desenhado no Draw.io ou Visual Paradigm utilizando estritamente **ícones oficiais da Azure Cloud**.
 - [ ] Inclusão explícita de todos os componentes da infraestrutura:
-  - Azure Resource Group
-  - Azure Container Registry (ACR)
-  - Azure Container Instances (ACI) - API
-  - Azure Container Instances (ACI) - Banco de Dados
+  - Azure Resource Group (`rg-petguardian-sprint3`)
+  - Azure Container Registry (`acrpetguardian`)
+  - Azure Container Instances (ACI) - API .NET (porta 8080)
+  - Azure Container Instances (ACI) - Banco de Dados Oracle (porta 1521)
   - Azure Storage Account / File Share Volume
-  - Portas de rede expostas (8080 e 1521/5432)
+  - Virtual Network (VNet) / Subnet / Network Security Group (NSG)
 - [ ] Personas representadas (Usuário Final e Desenvolvedor/DevOps).
-- [ ] Setas de fluxo com números sequenciais (1, 2, 3, 4, 5) e legenda detalhada explicando cada interação.
-- [ ] Exportação do arquivo em alta resolução em `docs/arquitetura_cloud_azure.png` e inclusão no README.
+- [ ] Setas de fluxo com números sequenciais (`[1]` a `[6]`) e legenda detalhada explicando cada interação.
+- [ ] Exportação do arquivo em alta resolução em `docs/arquitetura_cloud_azure.png` e incorporado ao `README.md`.
 
 #### Tarefas Técnicas (Child Tasks)
 * **Task 7.1:** Mapear componentes, portas e interações entre os serviços Azure. *(Estimativa: 2h)*
@@ -351,9 +333,9 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 * **Tags:** `DevOps`, `Documentation`, `README`, `GitHub`, `Sprint3`
 
 #### Descrição (História de Usuário)
-> **Como** Tech Lead do time,  
-> **Eu quero** reescrever o arquivo `README.md` do repositório contendo todas as seções obrigatórias especificadas na página 11, 12 e 13 do manual,  
-> **Para que** qualquer desenvolvedor ou avaliador consiga clonar o repositório e reproduzir o provisionamento na íntegra sem ambiguidades.
+> **Como** avaliador e desenvolvedor,  
+> **Eu quero** um README.md completo contendo descrição da solução, benefícios para o negócio, comandos Docker/CLI e passo a passo de deploy,  
+> **Para que** qualquer pessoa consiga reproduzir o deploy e validar a aplicação (evitando penalidade de -30 pts).
 
 #### Critérios de Aceite (Acceptance Criteria)
 - [ ] **Descrição da Solução:** Explicação detalhada do PetGuardian e seus objetivos de cuidado contínuo.
@@ -377,65 +359,47 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-09] Bateria de Testes do CRUD com Validação por SELECT no Banco de Dados
+### 🔹 [PBI-09] Roteiro e Execução dos Testes com Evidência de Persistência no Banco via SELECT
 * **Work Item Type:** `Product Backlog Item`
-* **Parent Feature:** `[FEAT-04] Roteiro de Demonstração, Gravação do Vídeo e Entrega Oficial`
+* **Parent Feature:** `[FEAT-04] Roteiro de Demonstração, Gravação do Vídeo sem Cortes e Entrega Oficial`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `3`
-* **Tags:** `DevOps`, `QA`, `Testing`, `Validation`, `Sprint3`
+* **Tags:** `DevOps`, `Testing`, `CRUD`, `SELECT`, `Sprint3`
 
 #### Descrição (História de Usuário)
-> **Como** analista de qualidade / QA,  
-> **Eu quero** elaborar um roteiro de testes executando as 4 operações de CRUD na API em nuvem e conferindo imediatamente a mutação no banco via `SELECT`,  
-> **Para que** a gravação do vídeo atenda estritamente à regra 9.3 do manual sem falhas ou inconsistências.
+> **Como** analista de QA e DevOps,  
+> **Eu quero** preparar e executar um roteiro de testes cobrindo todas as operações do CRUD e validando imediatamente cada alteração com um comando `SELECT` no banco,  
+> **Para que** a persistência em nuvem seja demonstrada de forma inquestionável no vídeo (evitando desconto de -30 pts).
 
 #### Critérios de Aceite (Acceptance Criteria)
-- [ ] Roteiro cobrindo:
-  1. `POST /api/pet` ➔ `SELECT * FROM PET WHERE ID = ...;` (evidenciando a inserção);
-  2. `POST /api/atendimento` ➔ `SELECT * FROM ATENDIMENTO WHERE ID = ...;` (evidenciando a relação);
-  3. `PUT /api/pet/{id}` ➔ `SELECT * FROM PET WHERE ID = ...;` (evidenciando a alteração de dados);
-  4. `GET /api/pet/{id}` e `GET /api/atendimento` (evidenciando a consulta de dados);
-  5. `DELETE /api/atendimento/{id}` ➔ `SELECT * FROM ATENDIMENTO;` (evidenciando a exclusão).
-- [ ] Todos os comandos SQL testados e validados no banco de dados containerizado no ACI.
-- [ ] Massa de dados com conteúdo significativo e contextualizado com o problema da Clyvo.
+- [ ] Roteiro estruturado: Inserção ➔ `SELECT`, Alteração (`PUT`) ➔ `SELECT`, Consulta ➔ `SELECT`, Exclusão (`DELETE`) ➔ `SELECT`.
+- [ ] Evidência clara da persistência no banco Oracle executando no ACI.
 
 #### Tarefas Técnicas (Child Tasks)
-* **Task 9.1:** Executar bateria completa de testes nos endpoints da API rodando no ACI. *(Estimativa: 2h)*
-  * *Descrição:* Testar as requisições HTTP e validar os retornos HTTP (`201 Created`, `200 OK`, `204 No Content`).
-* **Task 9.2:** Validar a execução dos comandos `SELECT` no cliente de banco de dados. *(Estimativa: 2h)*
-  * *Descrição:* Garantir que a exibição das tabelas fique clara e nítida no monitor para a gravação.
+* **Task 9.1:** Elaborar roteiro de teste com payloads JSON e queries SQL correspondentes. *(Estimativa: 2h)*
+* **Task 9.2:** Realizar ensaio do teste contra os containers online na Azure. *(Estimativa: 2h)*
 
 ---
 
-### 🔹 [PBI-10] Gravação do Vídeo Explicativo por Voz (720p+) e Geração do PDF Oficial de Entrega
+### 🔹 [PBI-10] Gravação do Vídeo Explicativo por Voz (720p+) e Geração do PDF Oficial da Entrega
 * **Work Item Type:** `Product Backlog Item`
-* **Parent Feature:** `[FEAT-04] Roteiro de Demonstração, Gravação do Vídeo e Entrega Oficial`
+* **Parent Feature:** `[FEAT-04] Roteiro de Demonstração, Gravação do Vídeo sem Cortes e Entrega Oficial`
 * **State:** `New`
 * **Priority:** `1 - Critical`
 * **Effort (Story Points):** `5`
-* **Tags:** `DevOps`, `Video`, `Presentation`, `Deliverable`, `Sprint3`
+* **Tags:** `DevOps`, `Video`, `PDF`, `Delivery`, `Sprint3`
 
 #### Descrição (História de Usuário)
-> **Como** membro da equipe Pet Guardian,  
-> **Eu quero** gravar o vídeo demonstrativo narrado por voz, sem cortes durante os testes e deploy, e gerar o PDF de entrega no formato estrito exigido,  
-> **Para que** a nota máxima de 80 pontos no vídeo seja atingida sem penalidades por regras de formato.
+> **Como** equipe Pet Guardian,  
+> **Eu quero** gravar um vídeo contínuo narrado demonstrando a criação dos recursos via Azure CLI, deploy e testes de persistência, e gerar o PDF oficial da entrega,  
+> **Para que** a entrega cumpra 100% das normas avaliativas da Sprint 3.
 
 #### Critérios de Aceite (Acceptance Criteria)
-- [ ] **Vídeo Gravado e Publicado no YouTube (Não Listado ou Público):**
-  - Resolução mínima de **720p** com áudio claro e **explicação por voz** de integrante(s) (proibido apenas legendas);
-  - Início obrigatório com o **clone do repositório no GitHub** em terminal limpo;
-  - Demonstração da **execução do Script Azure CLI** criando os recursos na Azure (Resource Group, ACR, ACI Banco, ACI API);
-  - Visualização dos recursos provisionados no Portal do Azure;
-  - Demonstração da aplicação e Swagger rodando no IP/FQDN do ACI;
-  - **Sem cortes** durante a demonstração das operações de CRUD e conferência imediata no banco via `SELECT`;
-  - Demonstração de inserção, alteração, exclusão e consulta com evidência no banco.
-- [ ] **Arquivo PDF Oficial de Entrega (`2TDSPG_Sprint3_DevOps.pdf`):**
-  - Contém **exclusivamente**:
-    1. Folha de rosto com Nome Completo, RM e Turma de todos os integrantes em ordem alfabética;
-    2. Link do repositório no GitHub;
-    3. Link do vídeo no YouTube.
-  - **NÃO PODE CONTER MAIS NADA NO PDF** (todo o conteúdo técnico deve estar no GitHub, regra estrita da página 12).
+- [ ] Vídeo em resolução mínima de 720p com áudio claro e narração por voz (sem legendas).
+- [ ] Demonstração do clone do repositório, execução do script Azure CLI, deploy no ACI e testes do CRUD com `SELECT` no banco (sem cortes na persistência).
+- [ ] Link do YouTube em modo Não Listado inserido no README e no PDF.
+- [ ] Arquivo PDF gerado contendo estritamente: nomes completos e RMs em **ordem alfabética**, link do GitHub e link do YouTube.
 
 #### Tarefas Técnicas (Child Tasks)
 * **Task 10.1:** Preparar ambiente de gravação (terminais, VS Code, DBeaver, Portal Azure e Swagger abertos). *(Estimativa: 2h)*
@@ -447,16 +411,16 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-## ⚠️ 7. Matriz de Riscos e Penalidades a Evitar
+## ⚠️ 8. Matriz de Riscos e Penalidades a Evitar
 
 | Risco / Item Avaliativo | Penalidade no Manual | Ação Preventiva no Backlog |
 | :--- | :---: | :--- |
 | **Entrega em LOCALHOST** | **Nota ZERO na Sprint** | Deploy obrigatório no Azure Container Instances (ACI) via Azure CLI com IP/DNS público. |
-| **Misturar opções (ex: App no ACI + Banco PaaS / FIAP)** | **-40 pontos** | Opção 1 pura: App no ACI + Banco de Dados em container no ACI com volume Azure File Share. |
-| **Recursos não criados via Azure CLI** | **-30 pontos** | Script `azure-cli-deploy.sh` automatiza 100% dos recursos sem cliques manuais no portal. |
-| **Container do App rodando como root/admin** | **-10 pontos** | PBI-01 configura `USER appuser` no estágio final do Dockerfile. |
-| **Desenho de arquitetura parecido com Fluxo, TOGAF ou UML** | **-20 pontos** | PBI-07 cria diagrama oficial de Cloud Architecture com ícones oficiais da Azure e fluxos numerados. |
-| **Sem evidência clara de cada operação do CRUD via SELECT** | **-30 pontos** | PBI-09 e PBI-10 executam `SELECT` no terminal/DBeaver imediatamente após cada `POST`, `PUT` e `DELETE`. |
+| **Misturar opções (ex: App no ACI + Banco PaaS / FIAP)** | **-40 pontos** | Opção 1 pura: App .NET no ACI + Banco Oracle em container no ACI com volume Azure File Share. |
+| **Recursos não criados via Azure CLI** | **-30 pontos** | Script `azure-cli-sprint3-acr-aci.sh` automatiza 100% dos recursos sem cliques manuais no portal. |
+| **Container do App rodando como root/admin** | **-10 pontos** | PBI-01 configura `USER appuser` no estágio final do Dockerfile .NET. |
+| **Desenho de arquitetura parecido com Fluxo, TOGAF ou UML** | **-20 pontos** | PBI-07 cria diagrama oficial com ícones Azure, portas (8080/1521), personas e fluxos [1] a [6]. |
+| **Sem evidência clara de cada operação do CRUD via SELECT** | **-30 pontos** | PBI-09 e PBI-10 executam `SELECT` imediatamente após cada `POST`, `PUT` e `DELETE`. |
 | **Vídeo sem explicação falada ou baixa qualidade (<720p)** | **-30 pontos** | Gravação em 1080p com narração clara por voz dos integrantes. |
 | **Conteúdo extra no PDF além de Folha de Rosto e Links** | **Perda de pontos** | PBI-10 restringe o PDF estritamente a nomes, RMs, link do GitHub e link do YouTube. |
 | **Utilizar apenas 1 tabela no CRUD ou tabelas fora do core** | **-20 a -30 pontos** | PBI-03 implementa CRUD em 2 tabelas core relacionadas (`Pet` e `Atendimento`). |
@@ -464,12 +428,12 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-## 👥 8. Integrantes da Equipe (Ordem Alfabética Obrigatória)
+## 👥 9. Integrantes da Equipe (Ordem Alfabética Obrigatória)
 
 | Nome Completo | RM | Turma | Papel / Responsabilidade |
 | :--- | :---: | :---: | :--- |
 | **Enzo Okuizumi** | 561432 | 2TDSPG | DevOps Engineer / Automação Azure CLI & ACI |
 | **Gustavo Okada** | 563428 | 2TDSPG | Cloud Architect / Diagramação de Arquitetura Azure |
-| **Lucas Barros Gouveia** | 566422 | 2TDSPG | Backend Developer / CRUD & Integração com Banco de Dados |
+| **Lucas Barros Gouveia** | 566422 | 2TDSPG | Backend Developer / CRUD .NET & Integração Oracle |
 | **Luna de Carvalho Guimarães** | 562290 | 2TDSPG | QA Engineer / Roteiro de Testes e Queries de Validação |
 | **Milton Marcelino** | 564836 | 2TDSPG | Security & Containers / Dockerfile Non-Root & Documentação |
