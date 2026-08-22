@@ -1,6 +1,6 @@
 # DevOps-Tools-Cloud-Computing - 🐾 PetGuardian
 
-> **DevOps & Cloud Computing**
+> **DevOps Tools & Cloud Computing**
 > 
 > API REST em .NET 10 desenvolvida para facilitar o **cuidado colaborativo de pets**. Focada na gestão de tarefas de saúde prescritas por veterinários, círculos de cuidado compartilhados, histórico clínico unificado e gamificação baseada em pontos.
 
@@ -11,89 +11,40 @@
 ![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white&style=for-the-badge)
 ![Entity Framework](https://img.shields.io/badge/EF%20Core-10.0-512BD4?logo=nuget&logoColor=white&style=for-the-badge)
 ![Oracle Database](https://img.shields.io/badge/Oracle-19c%20%2F%2021c-F80000?logo=oracle&logoColor=white&style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white&style=for-the-badge)
-![Azure](https://img.shields.io/badge/Azure-VM-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white&style=for-the-badge)
-![Azure](https://img.shields.io/badge/Azure-VM-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)
-![Oracle Database](https://img.shields.io/badge/Oracle-19c%20%2F%2021c-F80000?logo=oracle&logoColor=white&style=for-the-badge)
-![Entity Framework](https://img.shields.io/badge/EF%20Core-10.0-512BD4?logo=nuget&logoColor=white&style=for-the-badge)
-![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white&style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED?logo=docker&logoColor=white&style=for-the-badge)
+![Azure](https://img.shields.io/badge/Azure-ACI%20%2B%20ACR-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)
+![Azure CLI](https://img.shields.io/badge/Azure_CLI-IaC-0089D6?logo=gnubash&logoColor=white&style=for-the-badge)
 
 ---
-## Repositório Github e Vídeo Youtube
 
-[Repositório Github](https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing)
+## Repositório Github e Vídeo de Apresentação
 
-[Vídeo Youtube]()
-
-[Documentação DevOps](/docs/Documentação%20DevOps%20-%20Pet%20Guardian.pdf)
+[Repositório Github](https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing) | [Vídeo de Demonstração]()
 
 ---
 
 ## 👥 Integrantes
 
-<table>
-<tr>
-<th>Nome</th>
-<th>RM</th>
-<th>Turma</th>
-<th>GitHub</th>
-<th>LinkedIn</th>
-</tr>
-
-<tr>
-<td>Enzo Okuizumi</td>
-<td>561432</td>
-<td>2TDSPG</td>
-<td><a href="https://github.com/EnzoOkuizumiFiap">EnzoOkuizumiFiap</a></td>
-<td><a href="https://www.linkedin.com/in/enzo-okuizumi-b60292256/">Enzo Okuizumi</a></td>
-</tr>
-
-<tr>
-<td>Lucas Barros Gouveia</td>
-<td>566422</td>
-<td>2TDSPG</td>
-<td><a href="https://github.com/LuzBGouveia">LuzBGouveia</a></td>
-<td><a href="https://www.linkedin.com/in/lucas-barros-gouveia-09b147355/">Lucas Barros Gouveia</a></td>
-</tr>
-
-<tr>
-<td>Milton Marcelino</td>
-<td>564836</td>
-<td>2TDSPG</td>
-<td><a href="https://github.com/MiltonMarcelino">MiltonMarcelino</a></td>
-<td><a href="http://linkedin.com/in/milton-marcelino-250298142">Milton Marcelino</a></td>
-</tr>
-
-<tr>
-<td>Luna de Carvalho Guimarães</td>
-<td>562290</td>
-<td>2TDSPG</td>
-<td><a href="https://github.com/lunaguima">lunaguima</a></td>
-<td><a href="https://www.linkedin.com/in/luna-m-guimar%C3%A3es-1850ab173/">Luna M. Guimarães</a></td>
-</tr>
-
-<tr>
-<td>Gustavo Okada</td>
-<td>563428</td>
-<td>2TDSPG</td>
-<td><a href="https://github.com/Gdev3356">GustavoOkada7268</a></td>
-<td><a href="https://www.linkedin.com/in/gustavo-okada-53a3b8359/">Gustavo Okada</a></td>
-</tr>
-
-</table>
+| Nome | RM | Turma | GitHub | LinkedIn |
+| :--- | :---: | :---: | :--- | :--- |
+| **Enzo Okuizumi** | **561432** | 2TDSPG | [EnzoOkuizumiFiap](https://github.com/EnzoOkuizumiFiap) | [Enzo Okuizumi](https://www.linkedin.com/in/enzo-okuizumi-b60292256/) |
+| **Gustavo Okada** | **563428** | 2TDSPG | [Gdev3356](https://github.com/Gdev3356) | [Gustavo Okada](https://www.linkedin.com/in/gustavo-okada-53a3b8359/) |
+| **Lucas Barros Gouveia** | **566422** | 2TDSPG | [LuzBGouveia](https://github.com/LuzBGouveia) | [Lucas Barros Gouveia](https://www.linkedin.com/in/lucas-barros-gouveia-09b147355/) |
+| **Luna de Carvalho Guimarães** | **562290** | 2TDSPG | [lunaguima](https://github.com/lunaguima) | [Luna M. Guimarães](https://www.linkedin.com/in/luna-m-guimar%C3%A3es-1850ab173/) |
+| **Milton Marcelino** | **564836** | 2TDSPG | [MiltonMarcelino](https://github.com/MiltonMarcelino) | [Milton Marcelino](http://linkedin.com/in/milton-marcelino-250298142) |
 
 ---
 
 ## 💡 Sobre o Produto
 
-O **PetGuardian** foi concebido para resolver o problema da descentralização do cuidado diário de animais domésticos quando mais de um cuidador está envolvido. A plataforma organiza responsabilidades, registra o histórico de saúde e incentiva a realização de tarefas através de um sistema gamificado.
+O **PetGuardian** foi concebido para resolver o problema da descentralização do cuidado diário de animais domésticos quando mais de um cuidador está envolvido. A plataforma organiza responsabilidades, registra o histórico de saúde e incentiva a realização de tarefas através de um sistema gamificado centrado no animal.
 
-### 🌟 Pilares do Domínio
+### 🌟 Pilares da Arquitetura Pet-Centric & DevOps
 * **Círculo de Cuidado Colaborativo:** Vínculo dinâmico `N:N` entre cuidadores (`Usuario`) e `Pet` via tabela associativa gerenciada.
-* **Tarefas Prescritas com Pontuação:** Divisão de tarefas diárias com pontuação proporcional à complexidade.
-* **Histórico Clínico Unificado:** Consolidação cronológica decrescente contendo atendimentos veterinários e tarefas concluídas.
-* **Gamificação:** Score cumulativo individual para os cuidadores à medida que realizam os cuidados.
+* **Rotina Familiar Desacoplada:** Divisão de tarefas diárias familiares com pontuação proporcional ao cuidado.
+* **Histórico Clínico Unificado:** Consolidação cronológica contendo atendimentos clínicos veterinários, vacinas e pesagens.
+* **Gamificação Pet-Centric:** Score de Bem-Estar cumulativo acumulado **diretamente no Pet** à medida que a família cumpre os cuidados e módulos educativos.
+* **Infraestrutura Serverless Containerizada:** Deploy da API .NET no **Azure Container Instances (ACI)** a partir de imagens privadas no **Azure Container Registry (ACR)**, com banco de dados Oracle containerizado com volume persistente no Azure Files e segurança non-root (`USER appuser`).
 
 ### 🗄️ Modelagem Relacional do Banco de Dados
 
