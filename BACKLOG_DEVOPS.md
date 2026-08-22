@@ -2,6 +2,9 @@
 
 > **Projeto:** Pet Guardian (Challenge Clyvo 2026 — 2º Semestre)  
 > **Disciplina:** DevOps Tools & Cloud Computing (FIAP — 2TDSPG)  
+> **Epic Principal:** `[EPIC] Sprint 3 - DevOps Tools & Cloud Computing: Arquitetura em Nuvem Serverless Containerizada (.NET no ACR + ACI)`  
+> **Start Date:** `2026-09-02`  
+> **Target Date:** `2026-09-05`  
 > **Aplicação Escolhida para Deploy:** **Advanced Business Development with .NET (ASP.NET Core)**  
 > **Banco de Dados em Nuvem:** **Oracle Database em Container (ACI com Volume)**  
 > **Referência Oficial:** Manual do Challenge 2026 — Páginas 10 a 16  
@@ -125,7 +128,15 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-01] Refatoração do Dockerfile Multi-Stage .NET com Usuário Sem Privilégios (Non-Root)
+### 🧹 FEATURE 01: Engenharia de Containers & Segurança da Aplicação .NET
+* **Work Item Type:** `Feature`
+* **Parent Epic:** `[EPIC-03] Sprint 3 - DevOps Tools & Cloud Computing: Arquitetura em Nuvem Serverless Containerizada (.NET no ACR + ACI)`
+* **Tags:** `DevOps`
+* **Start Date:** `2026-09-02`
+* **Target Date:** `2026-09-03`
+* **Descrição:** Refatoração do Dockerfile da aplicação .NET para arquitetura multi-stage com usuário não privilegiado (non-root), segregação do DDL e validação do CRUD.
+
+#### 🔹 [PBI-01] Refatoração do Dockerfile Multi-Stage .NET com Usuário Sem Privilégios (Non-Root)
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação .NET`
 * **State:** `New`
@@ -154,7 +165,7 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-02] Segregação do DDL do Banco Core com Comentários (script_bd.sql)
+#### 🔹 [PBI-02] Segregação do DDL do Banco Core com Comentários (script_bd.sql)
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação .NET`
 * **State:** `New`
@@ -181,7 +192,7 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-03] Validação e Ajuste do CRUD .NET de 2+ Entidades Relacionadas com PUT e Persistência
+#### 🔹 [PBI-03] Validação e Ajuste do CRUD .NET de 2+ Entidades Relacionadas com PUT e Persistência
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-01] Engenharia de Containers & Segurança da Aplicação .NET`
 * **State:** `New`
@@ -205,7 +216,15 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-04] Script Azure CLI para Provisionamento do Resource Group e Azure Container Registry (ACR)
+### ⚙️ FEATURE 02: Infraestrutura como Código (IaC) via Azure CLI
+* **Work Item Type:** `Feature`
+* **Parent Epic:** `[EPIC-03] Sprint 3 - DevOps Tools & Cloud Computing: Arquitetura em Nuvem Serverless Containerizada (.NET no ACR + ACI)`
+* **Tags:** `DevOps`
+* **Start Date:** `2026-09-03`
+* **Target Date:** `2026-09-04`
+* **Descrição:** Automação em Azure CLI para criação do Resource Group, Azure Container Registry (ACR), container de banco Oracle no ACI com volume e deploy da API .NET.
+
+#### 🔹 [PBI-04] Script Azure CLI para Provisionamento do Resource Group e Azure Container Registry (ACR)
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-02] Infraestrutura como Código (IaC) via Azure CLI`
 * **State:** `New`
@@ -229,7 +248,7 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-05] Script Azure CLI para Provisionamento do Container de Banco Oracle no ACI com Volume
+#### 🔹 [PBI-05] Script Azure CLI para Provisionamento do Container de Banco Oracle no ACI com Volume
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-02] Infraestrutura como Código (IaC) via Azure CLI`
 * **State:** `New`
@@ -254,7 +273,7 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-06] Script Azure CLI para Build, Push e Deploy do Container .NET no ACI
+#### 🔹 [PBI-06] Script Azure CLI para Build, Push e Deploy do Container .NET no ACI
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-02] Infraestrutura como Código (IaC) via Azure CLI`
 * **State:** `New`
@@ -288,7 +307,15 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-07] Elaboração do Diagrama Macro de Arquitetura Cloud Azure com Ícones Oficiais
+### ☁️ FEATURE 03: Arquitetura de Nuvem, Documentação Técnica e Repositório GitHub
+* **Work Item Type:** `Feature`
+* **Parent Epic:** `[EPIC-03] Sprint 3 - DevOps Tools & Cloud Computing: Arquitetura em Nuvem Serverless Containerizada (.NET no ACR + ACI)`
+* **Tags:** `DevOps`
+* **Start Date:** `2026-09-04`
+* **Target Date:** `2026-09-05`
+* **Descrição:** Diagramação de nuvem Azure oficial com personas e fluxos numerados, e documentação técnica no README.md.
+
+#### 🔹 [PBI-07] Elaboração do Diagrama Macro de Arquitetura Cloud Azure com Ícones Oficiais
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-03] Arquitetura de Nuvem, Documentação Técnica e Repositório GitHub`
 * **State:** `New`
@@ -324,7 +351,7 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-08] Reestruturação Completa do README.md (How-To, Comandos, Benefícios e DDL)
+#### 🔹 [PBI-08] Reestruturação Completa do README.md (How-To, Comandos, Benefícios e DDL)
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-03] Arquitetura de Nuvem, Documentação Técnica e Repositório GitHub`
 * **State:** `New`
@@ -359,7 +386,15 @@ O diagrama deve ser um **Diagrama de Arquitetura de Nuvem Azure** elaborado no *
 
 ---
 
-### 🔹 [PBI-09] Roteiro e Execução dos Testes com Evidência de Persistência no Banco via SELECT
+### 📹 FEATURE 04: Roteiro de Demonstração, Gravação do Vídeo sem Cortes e Entrega Oficial
+* **Work Item Type:** `Feature`
+* **Parent Epic:** `[EPIC-03] Sprint 3 - DevOps Tools & Cloud Computing: Arquitetura em Nuvem Serverless Containerizada (.NET no ACR + ACI)`
+* **Tags:** `DevOps`
+* **Start Date:** `2026-09-04`
+* **Target Date:** `2026-09-05`
+* **Descrição:** Execução de ensaios de persistência e gravação do vídeo demonstrativo contínuo sem cortes com narração por voz.
+
+#### 🔹 [PBI-09] Roteiro e Execução dos Testes com Evidência de Persistência no Banco via SELECT
 * **Work Item Type:** `Product Backlog Item`
 * **Parent Feature:** `[FEAT-04] Roteiro de Demonstração, Gravação do Vídeo sem Cortes e Entrega Oficial`
 * **State:** `New`
