@@ -4,12 +4,16 @@ using PetGuardian.Application.Services.Interfaces;
 
 namespace PetGuardian.Application.Services.Implementations;
 
+/// <summary>
+/// IAtendimentoRepository removido; a rede de cuidado agora expõe Historico
+/// no lugar de Atendimentos. Adicionado Update (alterna responsável principal).
+/// </summary>
 public sealed class UsuarioPetService(
     IUsuarioPetRepository usuarioPetRepository,
-    IUsuarioRepository usuarioRepository,
-    IPetRepository petRepository,
-    ITarefaRepository tarefaRepository,
-    IAtendimentoRepository atendimentoRepository) : IUsuarioPetService
+    IUsuarioRepository    usuarioRepository,
+    IPetRepository        petRepository,
+    ITarefaRepository     tarefaRepository,
+    IHistoricoRepository  historicoRepository) : IUsuarioPetService
 {
     public IReadOnlyList<UsuarioPetResponse> GetAll() =>
         usuarioPetRepository.GetAll().Select(UsuarioPetResponse.FromDomain).ToList();
@@ -71,6 +75,32 @@ public sealed class UsuarioPetService(
         return UsuarioPetResponse.FromDomain(vinculo);
     }
 
+    /// <summary>Alterna se este usuário é o responsável principal do pet.</summary>
+    public UsuarioPetResponse? Update(Guid usuarioId, Guid petId, UsuarioPetUpdateRequest request)
+    {
+        var vinculo = usuarioPetRepository.GetByUsuarioAndPet(usuarioId, petId);
+        if (vinculo is null) return null;
+
+        if (!request.ResponPrinc && vinculo.ResponPrinc)
+        {
+            var totalResponsaveis = usuarioPetRepository.GetByPetId(petId).Count(v => v.ResponPrinc);
+            if (totalResponsaveis <= 1)
+                throw new InvalidOperationException(
+                    "Não é permitido remover o único responsável principal do pet. Promova outro cuidador antes.");
+        }
+
+        if (request.ResponPrinc && !vinculo.ResponPrinc)
+        {
+            var jaTemPrincipal = usuarioPetRepository.GetByPetId(petId).Any(v => v.ResponPrinc);
+            if (jaTemPrincipal)
+                throw new InvalidOperationException("Este pet já possui um responsável principal.");
+        }
+
+        vinculo.AtualizarResponsabilidade(request.ResponPrinc);
+        usuarioPetRepository.Update(vinculo);
+        return UsuarioPetResponse.FromDomain(vinculo);
+    }
+
     public RedeCuidadoResponse GetRedeCuidadoByUsuarioId(Guid usuarioId)
     {
         if (!usuarioRepository.ExistsById(usuarioId))
@@ -99,21 +129,15 @@ public sealed class UsuarioPetService(
                     t.PontosTarefa))
                 .ToList();
 
-            var atendimentos = atendimentoRepository.GetByPetId(petId)
-                .Select(a => new RedeCuidadoAtendimentoResponse(
-                    a.Id,
-                    a.Data,
-                    a.Anotacoes,
-                    a.Valor,
-                    a.StatusId,
-                    a.VeterinarioId))
+            var historico = historicoRepository.GetByPetId(petId)
+                .Select(h => new RedeCuidadoHistoricoResponse(h.Id, h.TipoHist, h.DataHist))
                 .ToList();
 
             petsDaRede.Add(new RedeCuidadoPetResponse(
                 pet.Id,
                 pet.Nome,
                 tarefas,
-                atendimentos));
+                historico));
 
             var vinculosDoPet = usuarioPetRepository.GetByPetId(petId);
             foreach (var vinculo in vinculosDoPet)

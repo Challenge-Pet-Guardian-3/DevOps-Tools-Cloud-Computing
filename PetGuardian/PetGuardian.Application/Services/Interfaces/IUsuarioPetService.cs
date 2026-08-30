@@ -10,6 +10,8 @@ public interface IUsuarioPetService
     UsuarioPetResponse Create(UsuarioPetRequest request);
     UsuarioPetResponse InviteByUsuario(UsuarioPetInviteByUsuarioRequest request);
     UsuarioPetResponse InviteByEmail(UsuarioPetInviteByEmailRequest request);
+    /// <summary>Alterna o responsável principal do vínculo.</summary>
+    UsuarioPetResponse? Update(Guid usuarioId, Guid petId, UsuarioPetUpdateRequest request);
     RedeCuidadoResponse GetRedeCuidadoByUsuarioId(Guid usuarioId);
     bool Delete(Guid usuarioId, Guid petId);
 }

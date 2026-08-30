@@ -52,6 +52,18 @@ public class UsuarioController(IUsuarioService usuarioService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    /// <summary>Atualiza nome/e-mail/senha de um usuário (telefone não é reatribuível por aqui).</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(UsuarioResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] UsuarioUpdateRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = usuarioService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     /// <summary>Exclui um registro de usuário cadastrado pelo seu ID.</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -8,5 +8,6 @@ public interface IBairroService
     BairroResponse? GetById(Guid id);
     IReadOnlyList<BairroResponse> GetByCidadeId(Guid cidadeId);
     BairroResponse Create(BairroRequest request);
+    BairroResponse? Update(Guid id, BairroRequest request);
     bool Delete(Guid id);
 }

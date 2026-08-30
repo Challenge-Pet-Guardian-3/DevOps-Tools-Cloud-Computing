@@ -8,5 +8,6 @@ public interface ICidadeService
     CidadeResponse? GetById(Guid id);
     IReadOnlyList<CidadeResponse> GetByEstadoId(Guid estadoId);
     CidadeResponse Create(CidadeRequest request);
+    CidadeResponse? Update(Guid id, CidadeRequest request);
     bool Delete(Guid id);
 }

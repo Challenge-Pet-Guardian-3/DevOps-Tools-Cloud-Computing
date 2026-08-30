@@ -2,7 +2,10 @@
 
 namespace PetGuardian.Application.Repositories;
 
-/// <summary>Repositório dedicado para a entidade de junção <see cref="UsuarioPet"/> (chave composta).</summary>
+/// <summary>
+/// Repositório dedicado para a entidade de junção <see cref="UsuarioPet"/> (chave composta).
+/// Adicionado Update, necessário para persistir a alternância de responsável principal via PUT.
+/// </summary>
 public interface IUsuarioPetRepository
 {
     IReadOnlyList<UsuarioPet> GetAll();
@@ -10,6 +13,7 @@ public interface IUsuarioPetRepository
     IReadOnlyList<UsuarioPet> GetByPetId(Guid petId);
     UsuarioPet? GetByUsuarioAndPet(Guid usuarioId, Guid petId);
     UsuarioPet Add(UsuarioPet entity);
+    UsuarioPet Update(UsuarioPet entity);
     bool Delete(Guid usuarioId, Guid petId);
     bool Exists(Guid usuarioId, Guid petId);
 }

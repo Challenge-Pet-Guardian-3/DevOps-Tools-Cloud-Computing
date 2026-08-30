@@ -9,5 +9,7 @@ public interface IUsuarioService
     UsuarioResponse? GetByEmail(string email);
     UsuarioScoreResponse GetScore(Guid usuarioId);
     UsuarioResponse Create(UsuarioRequest request);
+    /// <summary>TelefoneId não é reatribuível por aqui.</summary>
+    UsuarioResponse? Update(Guid id, UsuarioUpdateRequest request);
     bool Delete(Guid id);
 }

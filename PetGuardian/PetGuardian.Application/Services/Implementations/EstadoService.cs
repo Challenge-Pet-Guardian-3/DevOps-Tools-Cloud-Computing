@@ -22,6 +22,16 @@ public sealed class EstadoService(IRepository<Estado> estadoRepository) : IEstad
         estadoRepository.Add(estado);
         return EstadoResponse.FromDomain(estado);
     }
+    
+    public EstadoResponse? Update(Guid id, EstadoRequest request)
+    {
+        var estado = estadoRepository.GetById(id);
+        if (estado is null) return null;
+
+        estado.Atualizar(request.NomeEstado);
+        estadoRepository.Update(estado);
+        return EstadoResponse.FromDomain(estado);
+    }
 
     public bool Delete(Guid id) => estadoRepository.Delete(id);
 }

@@ -7,5 +7,6 @@ public interface IRacaService
     IReadOnlyList<RacaResponse> GetAll();
     RacaResponse? GetById(Guid id);
     RacaResponse Create(RacaRequest request);
+    RacaResponse? Update(Guid id, RacaRequest request);
     bool Delete(Guid id);
 }

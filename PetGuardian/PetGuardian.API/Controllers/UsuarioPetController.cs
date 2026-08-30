@@ -63,6 +63,18 @@ public class UsuarioPetController(IUsuarioPetService usuarioPetService) : Contro
         return CreatedAtAction(nameof(GetByPet), new { petId = created.PetId }, created);
     }
 
+    /// <summary>Alterna se este usuário é o responsável principal do pet.</summary>
+    [HttpPut("{usuarioId:guid}/{petId:guid}")]
+    [ProducesResponseType(typeof(UsuarioPetResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid usuarioId, Guid petId, [FromBody] UsuarioPetUpdateRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = usuarioPetService.Update(usuarioId, petId, request);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     /// <summary>Remove um vínculo pela chave composta (usuarioId + petId).</summary>
     [HttpDelete("{usuarioId:guid}/{petId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

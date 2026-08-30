@@ -28,9 +28,21 @@ public sealed class BairroService(
     {
         if (!cidadeRepository.ExistsById(request.CidadeId))
             throw new InvalidOperationException("Cidade não encontrada.");
-
         var bairro = request.ToDomain();
         bairroRepository.Add(bairro);
+        return BairroResponse.FromDomain(bairro);
+    }
+    
+    public BairroResponse? Update(Guid id, BairroRequest request)
+    {
+        var bairro = bairroRepository.GetById(id);
+        if (bairro is null) return null;
+
+        if (!cidadeRepository.ExistsById(request.CidadeId))
+            throw new InvalidOperationException("Cidade não encontrada.");
+
+        bairro.Atualizar(request.NomeBairro, request.CidadeId);
+        bairroRepository.Update(bairro);
         return BairroResponse.FromDomain(bairro);
     }
 

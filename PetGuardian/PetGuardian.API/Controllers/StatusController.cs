@@ -4,7 +4,7 @@ using PetGuardian.Application.Services.Interfaces;
 
 namespace PetGuardian.API.Controllers;
 
-/// <summary>Status de ciclo de vida compartilhado por tarefas e atendimentos.</summary>
+/// <summary>Status de ciclo de vida das tarefas.</summary>
 [Route("api/[controller]")]
 [ApiController]
 [Produces("application/json")]
@@ -34,6 +34,18 @@ public class StatusController(IStatusService statusService) : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var created = statusService.Create(request);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    /// <summary>Atualiza um status existente.</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(StatusResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] StatusRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = statusService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
     }
 
     /// <summary>Exclui um registro de status cadastrado pelo seu ID.</summary>

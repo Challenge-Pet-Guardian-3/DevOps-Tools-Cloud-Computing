@@ -23,5 +23,15 @@ public sealed class RacaService(IRepository<Raca> racaRepository) : IRacaService
         return RacaResponse.FromDomain(raca);
     }
 
+    public RacaResponse? Update(Guid id, RacaRequest request)
+    {
+        var raca = racaRepository.GetById(id);
+        if (raca is null) return null;
+
+        raca.Atualizar(request.NomeRaca);
+        racaRepository.Update(raca);
+        return RacaResponse.FromDomain(raca);
+    }
+
     public bool Delete(Guid id) => racaRepository.Delete(id);
 }

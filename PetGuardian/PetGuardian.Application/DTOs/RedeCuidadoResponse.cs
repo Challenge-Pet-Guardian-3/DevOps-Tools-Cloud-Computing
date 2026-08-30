@@ -1,5 +1,6 @@
 ﻿namespace PetGuardian.Application.DTOs;
 
+/// <summary>"Atendimentos" foi substituído por "Historico" em cada pet da rede (Atendimento removido do banco de dados).</summary>
 public record RedeCuidadoResponse(
     Guid UsuarioId,
     IReadOnlyList<RedeCuidadoPetResponse> Pets,
@@ -10,7 +11,7 @@ public record RedeCuidadoPetResponse(
     Guid PetId,
     string Nome,
     IReadOnlyList<RedeCuidadoTarefaResponse> Tarefas,
-    IReadOnlyList<RedeCuidadoAtendimentoResponse> Atendimentos
+    IReadOnlyList<RedeCuidadoHistoricoResponse> Historico
 );
 
 public record RedeCuidadoTarefaResponse(
@@ -18,18 +19,15 @@ public record RedeCuidadoTarefaResponse(
     string Titulo,
     DateTime Prazo,
     DateTime? Conclusao,
-    Guid? UsuarioExecutorId,
+    Guid UsuarioExecutorId,
     Guid StatusId,
     int PontosTarefa
 );
 
-public record RedeCuidadoAtendimentoResponse(
-    Guid AtendimentoId,
-    DateTime Data,
-    string Anotacoes,
-    decimal Valor,
-    Guid StatusId,
-    Guid VeterinarioId
+public record RedeCuidadoHistoricoResponse(
+    Guid HistoricoId,
+    string TipoHist,
+    DateTime DataHist
 );
 
 public record RedeCuidadoCoCuidadorResponse(

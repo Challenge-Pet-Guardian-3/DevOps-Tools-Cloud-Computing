@@ -9,17 +9,12 @@ namespace PetGuardian.API.Extensions;
 
 /// <summary>
 /// Extensões para registrar persistência e repositórios da solução PetGuardian na injeção de dependências.
+/// registros de Atendimento/Clinica/TipoAtend/Veterinario removidos;
+/// adicionados Trilha/Modulo/Aula/Historico.
 /// </summary>
 public static class PetGuardianServiceCollectionExtensions
 {
-    /// <summary>
-    /// Registra o <see cref="PetGuardianContext"/> com Oracle.
-    /// </summary>
-    /// <param name="services">Coleção de serviços da aplicação.</param>
-    /// <param name="configuration">Configuração (appsettings, variáveis de ambiente, etc.).</param>
-    /// <param name="connectionStringName">Chave em ConnectionStrings para Oracle (padrão: PetGuardianOracle).</param>
-    /// <returns>A mesma instância de <see cref="IServiceCollection"/> para encadeamento.</returns>
-    /// <exception cref="InvalidOperationException">Quando a connection string não for encontrada.</exception>
+    /// <summary>Registra o <see cref="PetGuardianContext"/> com Oracle.</summary>
     public static IServiceCollection AddPetGuardianDbContext(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -36,18 +31,16 @@ public static class PetGuardianServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// Registra todas as implementações de repositório como <c>Scoped</c> (um por requisição HTTP).
-    /// </summary>
-    /// <param name="services">Coleção de serviços da aplicação.</param>
-    /// <returns>A mesma instância de <see cref="IServiceCollection"/> para encadeamento.</returns>
+    /// <summary>Registra todas as implementações de repositório como <c>Scoped</c> (um por requisição HTTP).</summary>
     public static IServiceCollection AddPetGuardianRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<IPetRepository, PetRepository>();
-        services.AddScoped<IAtendimentoRepository, AtendimentoRepository>();
         services.AddScoped<ITarefaRepository, TarefaRepository>();
-        services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
+        services.AddScoped<ITrilhaRepository, TrilhaRepository>();
+        services.AddScoped<IModuloRepository, ModuloRepository>();
+        services.AddScoped<IAulaRepository, AulaRepository>();
+        services.AddScoped<IHistoricoRepository, HistoricoRepository>();
         services.AddScoped<IUsuarioPetRepository, UsuarioPetRepository>();
         services.AddScoped<IUsuarioEnderecoRepository, UsuarioEnderecoRepository>();
 
@@ -56,11 +49,7 @@ public static class PetGuardianServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// Adiciona serviços que orquestram repositórios.
-    /// </summary>
-    /// <param name="services">Coleção de serviços da aplicação.</param>
-    /// <returns>A mesma instância de <see cref="IServiceCollection"/> para encadeamento.</returns>
+    /// <summary>Adiciona serviços que orquestram repositórios.</summary>
     public static IServiceCollection AddPetGuardianApplicationServices(this IServiceCollection services)
     {
         // Hierarquia de endereço
@@ -70,21 +59,21 @@ public static class PetGuardianServiceCollectionExtensions
         services.AddScoped<IEnderecoService, EnderecoService>();
 
         // Lookup
-        services.AddScoped<IRacaService,      RacaService>();
-        services.AddScoped<IStatusService,    StatusService>();
-        services.AddScoped<ITipoAtendService, TipoAtendService>();
-        services.AddScoped<ITelefoneService,  TelefoneService>();
+        services.AddScoped<IRacaService,     RacaService>();
+        services.AddScoped<IStatusService,   StatusService>();
+        services.AddScoped<ITelefoneService, TelefoneService>();
 
         // Core
-        services.AddScoped<IClinicaService, ClinicaService>();
-        services.AddScoped<IVeterinarioService, VeterinarioService>();
         services.AddScoped<IUsuarioService, UsuarioService>();
         services.AddScoped<IPetService, PetService>();
-        services.AddScoped<IAtendimentoService, AtendimentoService>();
         services.AddScoped<ITarefaService, TarefaService>();
+        services.AddScoped<ITrilhaService, TrilhaService>();
+        services.AddScoped<IModuloService, ModuloService>();
+        services.AddScoped<IAulaService, AulaService>();
+        services.AddScoped<IHistoricoService, HistoricoService>();
 
         // Join tables
-        services.AddScoped<IUsuarioPetService,UsuarioPetService>();
+        services.AddScoped<IUsuarioPetService, UsuarioPetService>();
         services.AddScoped<IUsuarioEnderecoService, UsuarioEnderecoService>();
 
         return services;

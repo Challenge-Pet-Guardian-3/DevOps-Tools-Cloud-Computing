@@ -4,7 +4,7 @@ using PetGuardian.Application.Services.Interfaces;
 
 namespace PetGuardian.API.Controllers;
 
-/// <summary>Telefones de contato. Devem ser criados antes de Usuario e Veterinaria.</summary>
+/// <summary>Telefones de contato. Devem ser criados antes de Usuario.</summary>
 [Route("api/[controller]")]
 [ApiController]
 [Produces("application/json")]
@@ -34,6 +34,18 @@ public class TelefoneController(ITelefoneService telefoneService) : ControllerBa
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var created = telefoneService.Create(request);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    /// <summary>Atualiza um telefone existente.</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(TelefoneResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] TelefoneRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = telefoneService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
     }
 
     /// <summary>Exclui um registro de telefone cadastrado pelo seu ID.</summary>

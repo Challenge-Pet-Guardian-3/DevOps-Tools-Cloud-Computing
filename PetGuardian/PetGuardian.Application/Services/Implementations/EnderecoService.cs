@@ -31,6 +31,19 @@ public sealed class EnderecoService(
         return EnderecoResponse.FromDomain(endereco);
     }
 
+    /// <summary>Re-resolve o CEP e atualiza rua/bairro/número do endereço existente.</summary>
+    public EnderecoResponse? Update(Guid id, EnderecoRequest request)
+    {
+        var endereco = enderecoRepository.GetById(id);
+        if (endereco is null) return null;
+
+        var resolved = ResolveAddressFromCep(request.Cep);
+        var cepLimpo = request.Cep.Trim().Replace("-", "");
+        endereco.Atualizar(cepLimpo, resolved.Rua, request.Numero.Trim(), resolved.Bairro.Id);
+        enderecoRepository.Update(endereco);
+        return EnderecoResponse.FromDomain(endereco);
+    }
+
     public bool Delete(Guid id) => enderecoRepository.Delete(id);
 
     private Endereco FindOrCreateByCepAndNumero(string cep, string numero, string rua, Guid bairroId)

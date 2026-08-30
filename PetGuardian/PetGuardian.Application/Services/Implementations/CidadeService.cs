@@ -28,9 +28,21 @@ public sealed class CidadeService(
     {
         if (!estadoRepository.ExistsById(request.EstadoId))
             throw new InvalidOperationException("Estado não encontrado.");
-
         var cidade = request.ToDomain();
         cidadeRepository.Add(cidade);
+        return CidadeResponse.FromDomain(cidade);
+    }
+    
+    public CidadeResponse? Update(Guid id, CidadeRequest request)
+    {
+        var cidade = cidadeRepository.GetById(id);
+        if (cidade is null) return null;
+
+        if (!estadoRepository.ExistsById(request.EstadoId))
+            throw new InvalidOperationException("Estado não encontrado.");
+
+        cidade.Atualizar(request.NomeCidade, request.EstadoId);
+        cidadeRepository.Update(cidade);
         return CidadeResponse.FromDomain(cidade);
     }
 

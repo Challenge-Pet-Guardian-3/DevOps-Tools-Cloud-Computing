@@ -4,6 +4,7 @@ using PetGuardian.Domain.Entities;
 
 namespace PetGuardian.Infrastructure.Persistence.Repositories;
 
+/// <summary>GetByVeterinarioId removido.</summary>
 public sealed class TarefaRepository(PetGuardianContext context)
     : Repository<Tarefa>(context), ITarefaRepository
 {
@@ -14,10 +15,6 @@ public sealed class TarefaRepository(PetGuardianContext context)
     public IReadOnlyList<Tarefa> GetByUsuarioId(Guid usuarioId) =>
         Context.Tarefas.AsNoTracking()
             .Where(t => t.UsuarioId == usuarioId).OrderBy(t => t.Prazo).ToList();
-
-    public IReadOnlyList<Tarefa> GetByVeterinarioId(Guid veterinarioId) =>
-        Context.Tarefas.AsNoTracking()
-            .Where(t => t.VeterinarioId == veterinarioId).OrderBy(t => t.Prazo).ToList();
 
     public IReadOnlyList<Tarefa> GetByStatusId(Guid statusId) =>
         Context.Tarefas.AsNoTracking()

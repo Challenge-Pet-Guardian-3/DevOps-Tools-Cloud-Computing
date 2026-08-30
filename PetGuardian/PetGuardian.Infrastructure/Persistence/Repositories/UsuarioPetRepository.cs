@@ -4,6 +4,7 @@ using PetGuardian.Domain.Entities;
 
 namespace PetGuardian.Infrastructure.Persistence.Repositories;
 
+/// <summary>Adicionado Update (persiste a alternância de responsável principal feita via PUT).</summary>
 public sealed class UsuarioPetRepository(PetGuardianContext context) : IUsuarioPetRepository
 {
     public IReadOnlyList<UsuarioPet> GetAll() =>
@@ -21,6 +22,13 @@ public sealed class UsuarioPetRepository(PetGuardianContext context) : IUsuarioP
     public UsuarioPet Add(UsuarioPet entity)
     {
         context.UsuarioPets.Add(entity);
+        context.SaveChanges();
+        return entity;
+    }
+    
+    public UsuarioPet Update(UsuarioPet entity)
+    {
+        context.UsuarioPets.Update(entity);
         context.SaveChanges();
         return entity;
     }

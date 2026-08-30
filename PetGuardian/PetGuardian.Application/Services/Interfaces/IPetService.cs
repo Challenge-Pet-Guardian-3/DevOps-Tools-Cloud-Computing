@@ -9,5 +9,6 @@ public interface IPetService
     IReadOnlyList<PetResponse> GetByRacaId(Guid racaId);
     IReadOnlyList<PetHistoricoItemResponse> GetHistorico(Guid petId);
     PetResponse Create(PetRequest request);
+    PetResponse? Update(Guid id, PetRequest request);
     bool Delete(Guid id);
 }

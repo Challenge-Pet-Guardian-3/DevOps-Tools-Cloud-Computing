@@ -41,6 +41,18 @@ public class BairroController(IBairroService bairroService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    /// <summary>Atualiza um bairro existente.</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(BairroResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] BairroRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = bairroService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     /// <summary>Remove um bairro pelo Id.</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

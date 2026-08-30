@@ -4,7 +4,10 @@ using PetGuardian.Application.Services.Interfaces;
 
 namespace PetGuardian.API.Controllers;
 
-/// <summary>Tarefas de cuidado. Usuario é opcional; Veterinario é obrigatório.</summary>
+/// <summary>
+/// Tarefas de cuidado. SPRINT 3: sempre vinculadas a um Pet e a um Usuario responsável
+/// (Veterinario, que antes era obrigatório, não existe mais).
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 [Produces("application/json")]
@@ -36,12 +39,6 @@ public class TarefaController(ITarefaService tarefaService) : ControllerBase
     public IActionResult GetByUsuario(Guid usuarioId) =>
         Ok(tarefaService.GetByUsuarioId(usuarioId));
 
-    /// <summary>Lista todos os registros de tarefas de cuidado associados a um veterinário específico.</summary>
-    [HttpGet("by-veterinario/{veterinarioId:guid}")]
-    [ProducesResponseType(typeof(IReadOnlyList<TarefaResponse>), StatusCodes.Status200OK)]
-    public IActionResult GetByVeterinario(Guid veterinarioId) =>
-        Ok(tarefaService.GetByVeterinarioId(veterinarioId));
-
     /// <summary>Lista todos os registros de tarefas de cuidado associados a um status específico.</summary>
     [HttpGet("by-status/{statusId:guid}")]
     [ProducesResponseType(typeof(IReadOnlyList<TarefaResponse>), StatusCodes.Status200OK)]
@@ -57,6 +54,18 @@ public class TarefaController(ITarefaService tarefaService) : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var created = tarefaService.Create(request);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    /// <summary>Atualiza título/pontos/descrição/prazo de uma tarefa ainda não concluída.</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(TarefaResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] TarefaUpdateRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = tarefaService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
     }
 
     /// <summary>Registra a conclusão de uma tarefa de cuidado por um usuário, somando os pontos ao seu score.</summary>

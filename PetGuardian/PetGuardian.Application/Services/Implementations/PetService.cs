@@ -5,11 +5,15 @@ using PetGuardian.Domain.Entities;
 
 namespace PetGuardian.Application.Services.Implementations;
 
+/// <summary>
+/// IAtendimentoRepository removido (Atendimento não existe mais); GetHistorico agora combina
+/// Historico + Tarefas concluídas. Adicionado Update.
+/// </summary>
 public sealed class PetService(
-    IPetRepository petRepository,
-    IRepository<Raca> racaRepository,
-    IAtendimentoRepository atendimentoRepository,
-    ITarefaRepository tarefaRepository) : IPetService
+    IPetRepository       petRepository,
+    IRepository<Raca>    racaRepository,
+    ITarefaRepository    tarefaRepository,
+    IHistoricoRepository historicoRepository) : IPetService
 {
     public IReadOnlyList<PetResponse> GetAll() =>
         petRepository.GetAll().Select(PetResponse.FromDomain).ToList();
@@ -33,17 +37,15 @@ public sealed class PetService(
 
         var historico = new List<PetHistoricoItemResponse>();
 
-        historico.AddRange(atendimentoRepository.GetByPetId(petId)
-            .Select(a => new PetHistoricoItemResponse(
-                a.Data,
-                "ATENDIMENTO",
-                a.Id,
-                "Atendimento veterinário",
-                a.Anotacoes,
-                a.PetId,
+        historico.AddRange(historicoRepository.GetByPetId(petId)
+            .Select(h => new PetHistoricoItemResponse(
+                h.DataHist,
+                h.TipoHist,
+                h.Id,
+                h.TipoHist,
                 null,
-                a.VeterinarioId,
-                a.Valor,
+                h.PetId,
+                null,
                 null)));
 
         historico.AddRange(tarefaRepository.GetByPetId(petId)
@@ -56,8 +58,6 @@ public sealed class PetService(
                 t.Descricao,
                 t.PetId,
                 t.UsuarioId,
-                t.VeterinarioId,
-                null,
                 t.PontosTarefa)));
 
         return historico
@@ -72,6 +72,19 @@ public sealed class PetService(
 
         var pet = request.ToDomain();
         petRepository.Add(pet);
+        return PetResponse.FromDomain(pet);
+    }
+    
+    public PetResponse? Update(Guid id, PetRequest request)
+    {
+        var pet = petRepository.GetById(id);
+        if (pet is null) return null;
+
+        if (!racaRepository.ExistsById(request.RacaId))
+            throw new InvalidOperationException("Raça não encontrada.");
+
+        pet.Atualizar(request.Nome, request.DataNascimento, request.Sexo, request.Porte, request.Castrado, request.RacaId);
+        petRepository.Update(pet);
         return PetResponse.FromDomain(pet);
     }
 

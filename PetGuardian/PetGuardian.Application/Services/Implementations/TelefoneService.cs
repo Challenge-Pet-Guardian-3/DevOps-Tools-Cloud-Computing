@@ -22,6 +22,16 @@ public sealed class TelefoneService(IRepository<Telefone> telefoneRepository) : 
         telefoneRepository.Add(telefone);
         return TelefoneResponse.FromDomain(telefone);
     }
+    
+    public TelefoneResponse? Update(Guid id, TelefoneRequest request)
+    {
+        var telefone = telefoneRepository.GetById(id);
+        if (telefone is null) return null;
+
+        telefone.Atualizar(request.NumDdd, request.NumTel);
+        telefoneRepository.Update(telefone);
+        return TelefoneResponse.FromDomain(telefone);
+    }
 
     public bool Delete(Guid id) => telefoneRepository.Delete(id);
 }

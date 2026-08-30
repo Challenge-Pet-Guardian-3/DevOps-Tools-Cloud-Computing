@@ -41,6 +41,18 @@ public class CidadeController(ICidadeService cidadeService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    /// <summary>Atualiza uma cidade existente.</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(CidadeResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] CidadeRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = cidadeService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     /// <summary>Remove uma cidade pelo Id.</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

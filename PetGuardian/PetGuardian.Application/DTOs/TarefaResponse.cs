@@ -10,13 +10,12 @@ public record TarefaResponse(
     DateTime  Criacao,
     DateTime  Prazo,
     DateTime? Conclusao,
-    Guid?     UsuarioId,
+    Guid      UsuarioId,
     Guid      PetId,
-    Guid      StatusId,
-    Guid      VeterinarioId)
+    Guid      StatusId)
 {
     public static TarefaResponse FromDomain(Tarefa t) =>
         new(t.Id, t.Titulo, t.PontosTarefa, t.Descricao,
             t.Criacao, t.Prazo, t.Conclusao,
-            t.UsuarioId, t.PetId, t.StatusId, t.VeterinarioId);
+            t.UsuarioId, t.PetId, t.StatusId);
 }

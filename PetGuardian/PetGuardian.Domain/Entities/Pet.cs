@@ -7,45 +7,73 @@ namespace PetGuardian.Domain.Entities;
 /// <summary>
 /// Pet cadastrado no sistema. Pertence a uma <see cref="Raca"/>.
 /// Relacionamento N:N com <see cref="Usuario"/> via <see cref="UsuarioPet"/>.
+/// Possui trilhas de cuidado (<see cref="Trilha"/>) e um histórico de eventos (<see cref="Historico"/>).
 /// </summary>
+/// <remarks>
+/// Substitui <c>Idade (int)</c> por <c>DataNascimento (DATE)</c>, conforme novas mudanças no banco de dados.
+/// A propriedade <c>Atendimentos</c> foi removida (tabela ATENDIMENTO não existe mais).
+/// </remarks>
 public sealed class Pet : BaseEntity
 {
-    public string   Nome     { get; private set; } = string.Empty;
-    public int      Idade    { get; private set; }
-    public SexoPet  Sexo     { get; private set; }
-    public PortePet Porte    { get; private set; }
-    public bool     Castrado { get; private set; }
+    public string   Nome           { get; private set; } = string.Empty;
+    public DateTime DataNascimento { get; private set; }
+    public SexoPet  Sexo           { get; private set; }
+    public PortePet Porte          { get; private set; }
+    public bool     Castrado       { get; private set; }
 
     public Guid  RacaId { get; private set; }
     public Raca? Raca   { get; private set; }
 
-    // N:N
-    public List<UsuarioPet>  UsuariosPet  { get; private set; } = [];
-    public List<Atendimento> Atendimentos { get; private set; } = [];
-    public List<Tarefa>      Tarefas      { get; private set; } = [];
+    // N:N / 1:N
+    public List<UsuarioPet> UsuariosPet { get; private set; } = [];
+    public List<Tarefa>     Tarefas     { get; private set; } = [];
+    public List<Trilha>     Trilhas     { get; private set; } = [];
+    public List<Historico>  Historicos  { get; private set; } = [];
+
+    /// <summary>Idade em anos completos, calculada a partir da data de nascimento (não persistida).</summary>
+    public int IdadeEmAnos
+    {
+        get
+        {
+            var hoje = DateTime.UtcNow.Date;
+            var idade = hoje.Year - DataNascimento.Year;
+            if (DataNascimento.Date > hoje.AddYears(-idade))
+                idade--;
+            return idade;
+        }
+    }
 
     private Pet() { }
 
-    public Pet(string nome, int idade, SexoPet sexo, PortePet porte, bool castrado, Guid racaId)
+    public Pet(string nome, DateTime dataNascimento, SexoPet sexo, PortePet porte, bool castrado, Guid racaId)
     {
-        if (string.IsNullOrWhiteSpace(nome))
-            throw new DomainException("O nome do pet não pode ser vazio.");
-
-        if (nome.Trim().Length > 30)
-            throw new DomainException("O nome do pet deve ter no máximo 30 caracteres.");
-
-        if (idade is < 0 or > 99)
-            throw new DomainException("A idade do pet deve estar entre 0 e 99 anos.");
-
+        ValidarNome(nome);
+        ValidarDataNascimento(dataNascimento);
         if (racaId == Guid.Empty)
             throw new DomainException("O pet deve estar associado a uma raça válida.");
 
-        Nome     = nome.Trim();
-        Idade    = idade;
-        Sexo     = sexo;
-        Porte    = porte;
-        Castrado = castrado;
-        RacaId   = racaId;
+        Nome           = nome.Trim();
+        DataNascimento = dataNascimento.Date;
+        Sexo           = sexo;
+        Porte          = porte;
+        Castrado       = castrado;
+        RacaId         = racaId;
+    }
+
+    /// <summary>Atualiza os dados editáveis do pet (usado pelo endpoint PUT).</summary>
+    public void Atualizar(string nome, DateTime dataNascimento, SexoPet sexo, PortePet porte, bool castrado, Guid racaId)
+    {
+        ValidarNome(nome);
+        ValidarDataNascimento(dataNascimento);
+        if (racaId == Guid.Empty)
+            throw new DomainException("O pet deve estar associado a uma raça válida.");
+
+        Nome           = nome.Trim();
+        DataNascimento = dataNascimento.Date;
+        Sexo           = sexo;
+        Porte          = porte;
+        Castrado       = castrado;
+        RacaId         = racaId;
     }
 
     public void Castrar()
@@ -55,12 +83,19 @@ public sealed class Pet : BaseEntity
         Castrado = true;
     }
 
-    public void AtualizarIdade(int novaIdade)
+    private static void ValidarNome(string nome)
     {
-        if (novaIdade < Idade)
-            throw new DomainException("A nova idade não pode ser menor que a atual.");
-        if (novaIdade > 99)
-            throw new DomainException("A idade deve ser no máximo 99 anos.");
-        Idade = novaIdade;
+        if (string.IsNullOrWhiteSpace(nome))
+            throw new DomainException("O nome do pet não pode ser vazio.");
+        if (nome.Trim().Length > 30)
+            throw new DomainException("O nome do pet deve ter no máximo 30 caracteres.");
+    }
+
+    private static void ValidarDataNascimento(DateTime dataNascimento)
+    {
+        if (dataNascimento.Date > DateTime.UtcNow.Date)
+            throw new DomainException("A data de nascimento não pode estar no futuro.");
+        if (dataNascimento.Date < DateTime.UtcNow.Date.AddYears(-40))
+            throw new DomainException("A data de nascimento informada é inválida.");
     }
 }

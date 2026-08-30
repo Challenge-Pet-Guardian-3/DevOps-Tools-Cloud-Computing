@@ -5,6 +5,10 @@ using PetGuardian.Domain.Enums;
 
 namespace PetGuardian.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// "idade NUMBER(2)" virou "data_nasc DATE"; "castrado" passou de CHAR(1) para NUMBER;
+/// relação com Atendimentos removida; adicionadas Trilhas e Historicos.
+/// </summary>
 public sealed class PetConfiguration : IEntityTypeConfiguration<Pet>
 {
     public void Configure(EntityTypeBuilder<Pet> builder)
@@ -12,9 +16,12 @@ public sealed class PetConfiguration : IEntityTypeConfiguration<Pet>
         builder.ToTable("pet");
         builder.HasKey(p => p.Id);
         builder.Property(p => p.Id).HasColumnName("id_pet");
-
         builder.Property(p => p.Nome).HasColumnName("nome").HasMaxLength(30).IsRequired();
-        builder.Property(p => p.Idade).HasColumnName("idade").HasColumnType("NUMBER(2)").IsRequired();
+
+        builder.Property(p => p.DataNascimento)
+            .HasColumnName("data_nasc")
+            .HasColumnType("DATE")
+            .IsRequired();
 
         // CHECK: sexo IN ('M','F')
         builder.Property(p => p.Sexo)
@@ -34,13 +41,13 @@ public sealed class PetConfiguration : IEntityTypeConfiguration<Pet>
                 v => Enum.Parse<PortePet>(v, true))
             .IsRequired();
 
-        // CHECK: castrado IN ('0','1') — CHAR(1)
+        // castrado NUMBER (Alterado de CHAR(1) na sprint anterior)
         builder.Property(p => p.Castrado)
             .HasColumnName("castrado")
-            .HasMaxLength(1)
+            .HasColumnType("NUMBER(1)")
             .HasConversion(
-                v => v ? "1" : "0",
-                v => v == "1")
+                v => v ? 1 : 0,
+                v => v == 1)
             .IsRequired();
 
         builder.Property(p => p.RacaId).HasColumnName("raca_id_raca").IsRequired();
@@ -49,14 +56,19 @@ public sealed class PetConfiguration : IEntityTypeConfiguration<Pet>
             .HasForeignKey(p => p.RacaId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(p => p.Atendimentos)
-            .WithOne(a => a.Pet)
-            .HasForeignKey(a => a.PetId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasMany(p => p.Tarefas)
             .WithOne(t => t.Pet)
             .HasForeignKey(t => t.PetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.Trilhas)
+            .WithOne(t => t.Pet)
+            .HasForeignKey(t => t.PetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.Historicos)
+            .WithOne(h => h.Pet)
+            .HasForeignKey(h => h.PetId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

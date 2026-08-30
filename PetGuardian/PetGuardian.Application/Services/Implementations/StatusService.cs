@@ -22,6 +22,16 @@ public sealed class StatusService(IRepository<Status> statusRepository) : IStatu
         statusRepository.Add(status);
         return StatusResponse.FromDomain(status);
     }
+    
+    public StatusResponse? Update(Guid id, StatusRequest request)
+    {
+        var status = statusRepository.GetById(id);
+        if (status is null) return null;
+
+        status.Atualizar(request.NomeStatus);
+        statusRepository.Update(status);
+        return StatusResponse.FromDomain(status);
+    }
 
     public bool Delete(Guid id) => statusRepository.Delete(id);
 }

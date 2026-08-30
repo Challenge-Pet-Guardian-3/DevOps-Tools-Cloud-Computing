@@ -36,6 +36,18 @@ public class EstadoController(IEstadoService estadoService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    /// <summary>Atualiza um estado existente.</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(EstadoResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] EstadoRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = estadoService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     /// <summary>Remove um estado pelo Id.</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

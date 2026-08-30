@@ -3,6 +3,10 @@ using PetGuardian.Domain.Entities;
 
 namespace PetGuardian.Infrastructure.Persistence;
 
+/// <summary>
+/// DbSets de Atendimento/Clinica/TipoAtend/Veterinario removidos (fora do banco de dados atual).
+/// Adicionados Trilhas/Modulos/Aulas/Historicos.
+/// </summary>
 public class PetGuardianContext(DbContextOptions<PetGuardianContext> options) : DbContext(options)
 {
     // Hierarquia de endereço
@@ -12,21 +16,21 @@ public class PetGuardianContext(DbContextOptions<PetGuardianContext> options) : 
     public DbSet<Endereco> Enderecos { get; set; }
 
     // Lookup
-    public DbSet<Raca>      Racas      { get; set; }
-    public DbSet<Status>    Status     { get; set; }
-    public DbSet<TipoAtend> TipoAtend  { get; set; }
-    public DbSet<Telefone>  Telefones  { get; set; }
+    public DbSet<Raca>     Racas     { get; set; }
+    public DbSet<Status>   Status    { get; set; }
+    public DbSet<Telefone> Telefones { get; set; }
 
     // Core
-    public DbSet<Clinica>     Clinicas     { get; set; }
-    public DbSet<Veterinario> Veterinarios { get; set; }
-    public DbSet<Usuario>     Usuarios     { get; set; }
-    public DbSet<Pet>         Pets         { get; set; }
-    public DbSet<Atendimento> Atendimentos { get; set; }
-    public DbSet<Tarefa>      Tarefas      { get; set; }
+    public DbSet<Usuario>   Usuarios   { get; set; }
+    public DbSet<Pet>       Pets       { get; set; }
+    public DbSet<Tarefa>    Tarefas    { get; set; }
+    public DbSet<Trilha>    Trilhas    { get; set; }
+    public DbSet<Modulo>    Modulos    { get; set; }
+    public DbSet<Aula>      Aulas      { get; set; }
+    public DbSet<Historico> Historicos { get; set; }
 
     // Join tables
-    public DbSet<UsuarioPet>     UsuarioPets      { get; set; }
+    public DbSet<UsuarioPet>      UsuarioPets      { get; set; }
     public DbSet<UsuarioEndereco> UsuarioEnderecos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

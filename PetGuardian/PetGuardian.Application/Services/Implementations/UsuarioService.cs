@@ -8,7 +8,7 @@ namespace PetGuardian.Application.Services.Implementations;
 public sealed class UsuarioService(
     IUsuarioRepository    usuarioRepository,
     IRepository<Telefone> telefoneRepository,
-    ITarefaRepository tarefaRepository) : IUsuarioService
+    ITarefaRepository     tarefaRepository) : IUsuarioService
 {
     public IReadOnlyList<UsuarioResponse> GetAll() =>
         usuarioRepository.GetAll().Select(UsuarioResponse.FromDomain).ToList();
@@ -41,12 +41,29 @@ public sealed class UsuarioService(
     {
         if (usuarioRepository.ExistsByEmail(request.Email))
             throw new InvalidOperationException("Já existe um usuário com este e-mail.");
-
         if (!telefoneRepository.ExistsById(request.TelefoneId))
             throw new InvalidOperationException("Telefone não encontrado.");
 
         var usuario = request.ToDomain();
         usuarioRepository.Add(usuario);
+        return UsuarioResponse.FromDomain(usuario);
+    }
+
+    /// <summary>TelefoneId não é reatribuível por aqui.</summary>
+    public UsuarioResponse? Update(Guid id, UsuarioUpdateRequest request)
+    {
+        var usuario = usuarioRepository.GetById(id);
+        if (usuario is null) return null;
+
+        var usuarioComEsteEmail = usuarioRepository.GetByEmail(request.Email);
+        if (usuarioComEsteEmail is not null && usuarioComEsteEmail.Id != id)
+            throw new InvalidOperationException("Já existe um usuário com este e-mail.");
+
+        usuario.AtualizarNome(request.Nome);
+        usuario.AtualizarEmail(request.Email);
+        usuario.AtualizarSenha(request.Senha);
+        usuario.AtualizarRole(request.Role);
+        usuarioRepository.Update(usuario);
         return UsuarioResponse.FromDomain(usuario);
     }
 

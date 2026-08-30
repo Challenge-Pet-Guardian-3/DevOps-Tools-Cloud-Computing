@@ -4,7 +4,7 @@ using PetGuardian.Application.Services.Interfaces;
 
 namespace PetGuardian.API.Controllers;
 
-/// <summary>Endereços. Devem ser criados após Bairro. Usados por Usuario e Veterinaria.</summary>
+/// <summary>Endereços. Devem ser criados após Bairro. Usados por Usuario.</summary>
 [Route("api/[controller]")]
 [ApiController]
 [Produces("application/json")]
@@ -34,6 +34,18 @@ public class EnderecoController(IEnderecoService enderecoService) : ControllerBa
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var created = enderecoService.Create(request);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    /// <summary>Atualiza um endereço existente (o CEP é reconsultado no ViaCEP).</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(EnderecoResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Update(Guid id, [FromBody] EnderecoRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var updated = enderecoService.Update(id, request);
+        return updated is null ? NotFound() : Ok(updated);
     }
 
     /// <summary>Remove um endereço pelo Id.</summary>
