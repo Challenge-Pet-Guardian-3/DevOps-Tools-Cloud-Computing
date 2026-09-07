@@ -48,6 +48,10 @@ O **PetGuardian** foi concebido para resolver o problema da descentralização d
 
 ### 🗄️ Modelagem Relacional do Banco de Dados
 
+### 📐 Modelo Lógico
+![Modelo Lógico](docs/Logical.png)
+
+### 🗄️ Modelo Relacional
 ![Modelo Relacional](docs/Relational.png)
 
 ---
@@ -77,7 +81,7 @@ PetGuardian/
 ## 📐 Desenho Macro da Arquitetura
 A arquitetura da solução no ambiente Azure funciona conforme o fluxo de componentes abaixo:
 
-![Desenho Macro](docs/draw_macro.png)
+![Desenho Macro](docs/sprint-3.jpeg)
 
 ---
 
@@ -85,128 +89,7 @@ A arquitetura da solução no ambiente Azure funciona conforme o fluxo de compon
 Abaixo está o script sequencial em shell para provisionar a infraestrutura necessária na nuvem Azure e preparar a VM com Docker:
 
 ```bash
-#!/usr/bin/env bash
-set -e
 
-# Variáveis do Ambiente
-RG="rg-challenge-petguardian"
-LOCATION="canadacentral"
-VNET="vnet_petguardian"
-SUBNET="sub_net"
-NSG="nsg_petguardian"
-VM="vm-petguardian"
-ADMIN="petguardian-adm"
-
-# 1. Provisionar Grupo de Recursos
-echo "[1/6] Criando Grupo de Recursos..."
-az group create --name "$RG" --location "$LOCATION"
-
-# 2. Provisionar VNet e Subnet
-echo "[2/6] Criando VNet e Subnet..."
-az network vnet create \
-  --resource-group "$RG" \
-  --location "$LOCATION" \
-  --name "$VNET" \
-  --address-prefixes 10.10.0.0/16 \
-  --subnet-name "$SUBNET" \
-  --subnet-prefixes 10.10.1.0/24
-
-# 3. Provisionar Network Security Group (NSG)
-echo "[3/6] Criando Network Security Group..."
-az network nsg create --resource-group "$RG" --location "$LOCATION" --name "$NSG"
-
-# 4. Provisionar VM Ubuntu 22.04 LTS
-echo "[4/6] Criando Maquina Virtual Linux..."
-az vm create \
-  --resource-group "$RG" \
-  --name "$VM" \
-  --image Ubuntu2204 \
-  --size Standard_B2pls_v2 \
-  --admin-username "$ADMIN" \
-  --generate-ssh-keys \
-  --output json \
-  --verbose \
-  --vnet-name "$VNET" \
-  --subnet "$SUBNET" \
-  --nsg "$NSG"
-
-# 5. Liberar Portas Necessárias (SSH, API .NET, Oracle)
-echo "[5/6] Liberando Portas Necessárias..."
-az vm open-port --resource-group "$RG" --name "$VM" --port 22 --priority 1000
-az vm open-port --resource-group "$RG" --name "$VM" --port 8080 --priority 1010
-az vm open-port --resource-group "$RG" --name "$VM" --port 1521 --priority 1020
-
-# 6. Instalação automatizada do Docker e Dependências
-echo "[6/6] Instalando Docker e Dependências..."
-az vm run-command invoke \
-  --resource-group "$RG" \
-  --name "$VM" \
-  --command-id RunShellScript \
-  --scripts "
-    # Atualizar pacotes
-    sudo apt-get update -y
-
-    # Instalar dependencias
-    sudo apt-get install -y \
-      ca-certificates \
-      curl \
-      gnupg \
-      git \
-      nano \
-      unzip \
-      wget
-
-    # Adicionar repositorio Docker
-    sudo install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
-    echo \
-      \"deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      \$(. /etc/os-release && echo \"\$VERSION_CODENAME\") stable\" | \
-      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    # Instalar Docker
-    sudo apt-get update -y
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-    # Iniciar Docker e habilitar no boot
-    sudo systemctl start docker
-    sudo systemctl enable docker
-
-    # Adicionar usuario ao grupo docker (sem precisar de sudo)
-    sudo usermod -aG docker $ADMIN
-
-    # Verificar instalacao
-    docker --version
-    docker compose version
-
-    echo 'Instalacao concluida!'
-  "
-
-# Exibe o IP Público gerado para conexões
-PUBLIC_IP=$(az vm show --resource-group "$RG" --name "$VM" --show-details --query publicIps --output tsv)
-
-echo "===================================================="
-echo " Provisionamento concluido com sucesso!"
-echo " IP Publico da VM: $PUBLIC_IP"
-echo " Acesse via SSH: ssh $ADMIN@$PUBLIC_IP"
-echo " Aplicacao (apos deploy): http://$PUBLIC_IP:8080"
-echo " Swagger: http://$PUBLIC_IP:8080/index.html"
-echo "===================================================="
-
-# ============================================================
-# COMANDOS PARA DEPLOY (executar após conectar na VM via SSH)
-# ============================================================
-# ssh petguardian-adm@<IP_DA_VM>
-# git clone https://github.com/Challenge-Pet-Guardian/DevOps-Tools-Cloud-Computing.git
-# cd DevOps-Tools-Cloud-Computing/PetGuardian
-# docker compose up -d
-# docker compose logs -f
-
-# ============================================================
-# COMANDO PARA DELETAR A VM AO FINAL (OBRIGATORIO)
-# ============================================================
-# az group delete --name rg-challenge-petguardian --yes --no-wait
  
 ```
 
@@ -217,86 +100,7 @@ echo "===================================================="
 ### Dockerfile da API (Segurança Não-Root)
 Localizado em `PetGuardian.API/Dockerfile`:
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["PetGuardian.API/PetGuardian.API.csproj", "PetGuardian.API/"]
-COPY ["PetGuardian.Application/PetGuardian.Application.csproj", "PetGuardian.Application/"]
-COPY ["PetGuardian.Domain/PetGuardian.Domain.csproj", "PetGuardian.Domain/"]
-COPY ["PetGuardian.Infrastructure/PetGuardian.Infrastructure.csproj", "PetGuardian.Infrastructure/"]
-RUN dotnet restore "PetGuardian.API/PetGuardian.API.csproj"
-COPY . .
-WORKDIR "/src/PetGuardian.API"
-RUN dotnet build "./PetGuardian.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./PetGuardian.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "PetGuardian.API.dll"]
-```
-
-### Docker Compose Orquestrador (`docker-compose.yml`)
-Localizado em `PetGuardian/docker-compose.yml`:
-```yaml
-services:
-  oracle-db:
-    image: gvenzl/oracle-xe:21-slim
-    container_name: oracle-db
-    environment:
-      APP_USER: "pet_guardian"
-      APP_USER_PASSWORD: "petguardian123"
-      ORACLE_PASSWORD: "oraclepetguardian"
-    volumes:
-      - oracle_data:/opt/oracle/oradata
-    healthcheck:
-      test: ["CMD-SHELL", "healthcheck.sh"]
-      interval: 10s
-      timeout: 5s
-      retries: 15
-      start_period: 40s
-    networks:
-      - challenge_net
-    restart: unless-stopped
-    ports:
-      - "1521:1521"
-
-  petguardian-api:
-    build:
-      context: .
-      dockerfile: PetGuardian.API/Dockerfile
-      args:
-        BUILD_CONFIGURATION: Release
-    image: enzookuizumi/petguardian-api:v1
-    container_name: petguardian-api
-    depends_on:
-      oracle-db:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    environment:
-      ASPNETCORE_ENVIRONMENT: Staging
-      ASPNETCORE_HTTP_PORTS: 8080
-      ConnectionStrings__PetGuardianOracle: "User Id=pet_guardian;Password=petguardian123;Data Source=oracle-db:1521/XEPDB1;"
-    networks:
-      - challenge_net
-    restart: on-failure
-
-networks:
-  challenge_net:
-    driver: bridge
-
-volumes:
-  oracle_data:
 ```
 
 ## 📖 Instruções de Instalação e Execução na VM (How To)
@@ -391,34 +195,6 @@ docker push enzookuizumi/petguardian-api:v1
 | POST | /api/tarefa/{id}/concluir | Concluir tarefa (computando os pontos para o score do usuário) |
 | DELETE | /api/tarefa/{id} | Deletar uma tarefa |
 
-### Atendimentos Clínicos
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/atendimento | Listar todos os atendimentos |
-| GET | /api/atendimento/{id} | Buscar atendimento por ID |
-| GET | /api/atendimento/by-pet/{petId} | Listar atendimentos de um pet |
-| GET | /api/atendimento/by-veterinario/{veterinarioId} | Listar atendimentos por veterinário |
-| POST | /api/atendimento | Cadastrar um novo atendimento clínico |
-| DELETE | /api/atendimento/{id} | Deletar um atendimento |
-
-### Veterinários
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/veterinario | Listar todos os veterinários |
-| GET | /api/veterinario/{id} | Buscar veterinário por ID |
-| GET | /api/veterinario/by-email | Buscar veterinário por e-mail |
-| GET | /api/veterinario/by-clinica/{clinicaId} | Listar veterinários vinculados a uma clínica |
-| POST | /api/veterinario | Cadastrar um novo veterinário |
-| DELETE | /api/veterinario/{id} | Remover um veterinário |
-
-### Clínicas Veterinárias
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/clinica | Listar todas as clínicas |
-| GET | /api/clinica/{id} | Buscar clínica por ID |
-| POST | /api/clinica | Cadastrar uma nova clínica |
-| DELETE | /api/clinica/{id} | Remover uma clínica |
-
 ### Endereços
 | Método | Rota | Descrição |
 |--------|------|-----------|
@@ -485,11 +261,3 @@ docker push enzookuizumi/petguardian-api:v1
 | GET | /api/status/{id} | Buscar status por ID |
 | POST | /api/status | Cadastrar um novo status |
 | DELETE | /api/status/{id} | Remover um status |
-
-### Tipos de Atendimento
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/tipoatend | Listar todos os tipos de atendimento |
-| GET | /api/tipoatend/{id} | Buscar tipo de atendimento por ID |
-| POST | /api/tipoatend | Cadastrar um novo tipo de atendimento |
-| DELETE | /api/tipoatend/{id} | Remover um tipo de atendimento |
