@@ -1,25 +1,25 @@
-# DevOps-Tools-Cloud-Computing - 🐾 PetGuardian
+# DevOps-Tools-Cloud-Computing — 🐾 PetGuardian
 
-> **DevOps Tools & Cloud Computing**
-> 
-> API REST em .NET 10 desenvolvida para facilitar o **cuidado colaborativo de pets**. Focada na gestão de tarefas de saúde prescritas por veterinários, círculos de cuidado compartilhados, histórico clínico unificado e gamificação baseada em pontos.
+> **DevOps Tools & Cloud Computing — Sprint 3**
+>
+> API REST em **Java Spring Boot 4.1.1** para gestão colaborativa do cuidado de pets. Arquitetura 100% containerizada na Microsoft Azure utilizando **ACR + ACI** com banco de dados **PostgreSQL 16** em container com volume persistente.
 
 ---
 
 ## 🛠️ Tecnologias & Badges
 
-![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white&style=for-the-badge)
-![Entity Framework](https://img.shields.io/badge/EF%20Core-10.0-512BD4?logo=nuget&logoColor=white&style=for-the-badge)
-![Oracle Database](https://img.shields.io/badge/Oracle-19c%20%2F%2021c-F80000?logo=oracle&logoColor=white&style=for-the-badge)
+![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white&style=for-the-badge)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F?logo=springboot&logoColor=white&style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white&style=for-the-badge)
 ![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED?logo=docker&logoColor=white&style=for-the-badge)
-![Azure](https://img.shields.io/badge/Azure-ACI%20%2B%20ACR-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)
+![Azure](https://img.shields.io/badge/Azure-ACR%20%2B%20ACI-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)
 ![Azure CLI](https://img.shields.io/badge/Azure_CLI-IaC-0089D6?logo=gnubash&logoColor=white&style=for-the-badge)
 
 ---
 
-## Repositório Github e Vídeo de Apresentação
+## 🔗 Repositório GitHub e Vídeo de Apresentação
 
-[Repositório Github](https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing) | [Vídeo de Demonstração]()
+[Repositório GitHub](https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing) | [Vídeo de Demonstração]()
 
 ---
 
@@ -37,16 +37,77 @@
 
 ## 💡 Sobre o Produto
 
-O **PetGuardian** foi concebido para resolver o problema da descentralização do cuidado diário de animais domésticos quando mais de um cuidador está envolvido. A plataforma organiza responsabilidades, registra o histórico de saúde e incentiva a realização de tarefas através de um sistema gamificado centrado no animal.
+O **PetGuardian** resolve o problema da descentralização do cuidado diário de animais domésticos quando múltiplos cuidadores estão envolvidos. A plataforma organiza responsabilidades, registra o histórico clínico e incentiva a realização de tarefas através de um sistema gamificado centrado no bem-estar do animal.
 
-### 🌟 Pilares da Arquitetura Pet-Centric & DevOps
-* **Círculo de Cuidado Colaborativo:** Vínculo dinâmico `N:N` entre cuidadores (`Usuario`) e `Pet` via tabela associativa gerenciada.
-* **Rotina Familiar Desacoplada:** Divisão de tarefas diárias familiares com pontuação proporcional ao cuidado.
-* **Histórico Clínico Unificado:** Consolidação cronológica contendo atendimentos clínicos veterinários, vacinas e pesagens.
-* **Gamificação Pet-Centric:** Score de Bem-Estar cumulativo acumulado **diretamente no Pet** à medida que a família cumpre os cuidados e módulos educativos.
-* **Infraestrutura Serverless Containerizada:** Deploy da API .NET no **Azure Container Instances (ACI)** a partir de imagens privadas no **Azure Container Registry (ACR)**, com banco de dados Oracle containerizado com volume persistente no Azure Files e segurança non-root (`USER appuser`).
+### 🌟 Pilares da Arquitetura Pet-Centric
 
-### 🗄️ Modelagem Relacional do Banco de Dados
+* **Círculo de Cuidado Colaborativo:** Vínculo dinâmico `N:N` entre cuidadores (`Usuario`) e `Pet` via tabela associativa `usuario_pet`.
+* **Tarefas de Saúde Gamificadas:** Cada tarefa concluída acumula pontos para o cuidador responsável.
+* **Histórico Clínico Unificado:** Consolidação cronológica de vacinas, consultas e pesagens do pet.
+* **Infraestrutura 100% Containerizada:** API Java e banco PostgreSQL executando no **Azure Container Instances (ACI)**, imagens gerenciadas no **Azure Container Registry (ACR)**, persistência garantida por **Azure Files**.
+
+---
+
+## 📈 Benefícios para o Negócio
+
+* **Centralização do Cuidado:** Elimina falhas de comunicação entre tutores e co-cuidadores ao centralizar histórico e responsabilidades em uma única plataforma.
+* **Engajamento por Gamificação:** O sistema de pontuação por tarefa converte obrigações de saúde em interações motivadoras, aumentando a retenção e o engajamento ativo dos cuidadores.
+* **Prevenção de Complicações Médicas:** O acompanhamento rigoroso de prazos de vacinas, medicamentos e consultas evita esquecimentos que poderiam resultar em internações emergenciais e custos elevados.
+* **Portabilidade e Escalabilidade:** Arquitetura containerizada garante paridade entre desenvolvimento local e nuvem, permitindo escalar os containers de API e banco de forma independente conforme a demanda.
+* **Segurança e Auditabilidade:** Controle de acesso por JWT (OAuth2 Resource Server com RSA) e histórico de atendimentos auditável permitem rastreabilidade completa das ações dos cuidadores.
+
+---
+
+## 📐 Desenho Macro da Arquitetura
+
+A arquitetura da solução utiliza exclusivamente a **Opção 1 (ACR + ACI)** do edital, com todos os recursos provisionados 100% via Azure CLI:
+
+![Desenho Macro](docs/sprint-3.jpeg)
+
+### Fluxo da Arquitetura
+
+```
+[Desenvolvedor] ──(1)──► docker build / docker push ──► [ACR: acrpetguardian]
+                                                                │
+[ACR] ──────────────────────────────────────────────────(2)──► [ACI: aci-api-petguardian]
+                                                                │ porta 8091
+[Azure Files: stpetguardiandata] ──────volume mount─────(3)──► [ACI: aci-db-petguardian]
+                                                                │ porta 5432 (PostgreSQL)
+[Cliente/Swagger] ──────────────────────(4)──► [aci-api-petguardian:8091] ──► [aci-db-petguardian:5432]
+```
+
+| Componente Azure | Recurso | Função |
+| :--- | :--- | :--- |
+| Resource Group | `rg-petguardian` | Agrupamento lógico de todos os recursos |
+| Container Registry | `acrpetguardian` | Repositório privado de imagens Docker |
+| Container Instance | `aci-api-petguardian` | Executa a API Java Spring Boot na porta 8091 |
+| Container Instance | `aci-db-petguardian` | Executa o PostgreSQL 16 na porta 5432 |
+| Storage Account | `stpetguardiandata` | Conta de armazenamento para persistência |
+| File Share | `pgdata` | Volume montado em `/var/lib/postgresql/data` |
+
+---
+
+## 📂 Estrutura do Repositório
+
+```text
+DevOps-Tools-Cloud-Computing/
+  ├── Java-Advanced/           # Código-fonte da API Java Spring Boot
+  │   ├── src/                 # Pacotes da aplicação
+  │   ├── build.gradle         # Configuração de build Gradle
+  │   ├── compose.yml          # Docker Compose para ambiente local de desenvolvimento
+  │   └── Dockerfile           # Dockerfile multi-stage com usuário non-root (appuser)
+  ├── docs/
+  │   ├── sprint-3.jpeg        # Diagrama de arquitetura Cloud Azure
+  │   ├── sprint-3.drawio      # Fonte editável do diagrama (Draw.io)
+  │   ├── Logical.png          # Modelo lógico do banco de dados
+  │   └── Relational.png       # Modelo relacional do banco de dados
+  ├── script.sh                # Script Azure CLI de provisionamento completo (IaC)
+  └── script_bd.sql            # DDL das tabelas CORE com comentários (PostgreSQL)
+```
+
+---
+
+## 🗄️ Modelagem do Banco de Dados
 
 ### 📐 Modelo Lógico
 ![Modelo Lógico](docs/Logical.png)
@@ -56,208 +117,349 @@ O **PetGuardian** foi concebido para resolver o problema da descentralização d
 
 ---
 
-## 📂 Estrutura do Repositório
+## 🐋 Dockerfile da API Java (Multi-Stage + Non-Root)
 
-```text
-PetGuardian/
-  ├── PetGuardian.API/         # Endpoints, Middlewares e Injeção de Dependência
-  ├── PetGuardian.Application/ # Camada de Aplicação (DTOs, Regras de Negócio e Serviços)
-  ├── PetGuardian.Domain/      # Entidades Core de Domínio e Invariantes
-  ├── PetGuardian.Infrastructure/ # Persistência (EF Core, Configurações Oracle e Migrations)
-  ├── docker-compose.yml       # Orquestração do Banco Oracle + API na VM Azure
-  └── DEPLOYMENT.md            # Guia complementar de deploy
-```
+O container da API **não executa como root ou admin**, conforme requisito obrigatório do edital (item 8.2, penalidade de -10 pts). O `Dockerfile` está em `Java-Advanced/Dockerfile`:
 
----
-
-## 📈 Benefícios da Solução para o Negócio
-* **Centralização do Cuidado:** Consolida o histórico clínico de pets e tarefas diárias, eliminando falhas de comunicação entre tutores e co-cuidadores.
-* **Engajamento e Fidelização:** A gamificação (sistema de score) motiva a participação ativa nas tarefas cotidianas de saúde do pet, convertendo obrigações em interações gamificadas.
-* **Prevenção de Complicações Médicas:** O acompanhamento cronológico rigoroso de medicamentos, vacinas e consultas evita esquecimentos e complicações de saúde, reduzindo custos com internações emergenciais.
-* **Portabilidade e Nuvem:** O uso de containers Docker garante que a aplicação execute com consistência absoluta desde o desenvolvimento local até a infraestrutura em nuvem na VM Azure.
-
----
-
-## 📐 Desenho Macro da Arquitetura
-A arquitetura da solução no ambiente Azure funciona conforme o fluxo de componentes abaixo:
-
-![Desenho Macro](docs/sprint-3.jpeg)
-
----
-
-## ☁️ Script Completo do Azure CLI
-Abaixo está o script sequencial em shell para provisionar a infraestrutura necessária na nuvem Azure e preparar a VM com Docker:
-
-```bash
-
- 
-```
-
----
-
-## 🐋 Dockerfile & Docker Compose da Aplicação
-
-### Dockerfile da API (Segurança Não-Root)
-Localizado em `PetGuardian.API/Dockerfile`:
 ```dockerfile
+# Stage 1 — BUILD
+FROM gradle:8.12-jdk17 AS build
+WORKDIR /app
+COPY build.gradle settings.gradle ./
+COPY gradle/ gradle/
+RUN gradle dependencies --no-daemon || true
+COPY src/ src/
+RUN gradle bootJar --no-daemon -x test
 
+# Stage 2 — RUNTIME (imagem mínima de produção)
+FROM eclipse-temurin:17-jre-alpine AS runtime
+WORKDIR /app
+
+# Cria usuário e grupo sem privilégios administrativos
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/src/main/resources/keys/ /app/keys/
+RUN chown -R appuser:appgroup /app
+
+# Executa como usuário não privilegiado
+USER appuser
+
+EXPOSE 8091
+ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
-## 📖 Instruções de Instalação e Execução na VM (How To)
+---
 
-### 1. Build e Upload da Imagem (Máquina de Desenvolvimento Local)
+## 🚀 Como Executar — How To (Deploy Completo)
+
+### Pré-requisitos
+
+* [Azure CLI](https://learn.microsoft.com/pt-br/cli/azure/install-azure-cli) instalado e autenticado (`az login`)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando
+* Acesso à assinatura Azure com permissões de Contributor
+
+---
+
+### 1. Clone do Repositório (Ponto de Partida Obrigatório)
+
 ```bash
-# Efetue login no Docker Hub
-docker login
-
-# Build e Tags da imagem
-docker build -t petguardian-api:v1 -f PetGuardian/PetGuardian.API/Dockerfile PetGuardian/
-docker tag petguardian-api:v1 enzookuizumi/petguardian-api:v1
-
-# Enviar imagem
-docker push enzookuizumi/petguardian-api:v1
+git clone https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing.git
+cd DevOps-Tools-Cloud-Computing
 ```
 
-### 2. Execução do Deploy na VM Azure (Passo a Passo)
-1. **Conecte via SSH na VM provisionada:**
-   ```bash
-   ssh azureuser@<IP_PUBLICO_DA_VM>
-   ```
-2. **Clone seu repositório na VM:**
-   ```bash
-   git clone https://github.com/Enzo-C/DevOps-Tools-Cloud-Computing.git challenge-devops
-   cd challenge-devops/PetGuardian
-   ```
-3. **Edite o arquivo `docker-compose.yml` para referenciar a imagem do Docker Hub:**
-   ```bash
-   nano docker-compose.yml
-   # Modifique a propriedade "image" do serviço "petguardian-api" para:
-   # image: enzookuizumi/petguardian-api:v1
-   ```
-4. **Execute os containers em background:**
-   ```bash
-   docker compose up -d
-   ```
-5. **Verifique se as tabelas foram migradas e a aplicação está saudável:**
-   ```bash
-   docker compose ps
-   docker logs petguardian-api
-   ```
-6. **Acesse remotamente o Swagger da API via IP público:**
-   * URL: `http://<IP_PUBLICO_DA_VM>:8080/index.html`
+---
+
+### 2. Execução Local com Docker Compose (Desenvolvimento)
+
+Execute localmente antes do deploy em nuvem para validar a aplicação:
+
+```bash
+cd Java-Advanced
+
+# Sobe o banco PostgreSQL localmente
+docker compose up -d
+
+# Build da imagem da API
+docker build -t petguardian-api:local .
+
+# Executa a API conectada ao banco local
+docker run -d \
+  -p 8091:8091 \
+  -e PGHOST=host.docker.internal \
+  -e PGPORT=5432 \
+  -e PGDATABASE=petguardian \
+  -e PGUSER=petguardian \
+  -e PGPASSWORD=petguardian \
+  --name petguardian-api \
+  petguardian-api:local
+
+# Acesse o Swagger local:
+# http://localhost:8091/swagger-ui/index.html
+```
+
+---
+
+### 3. Deploy na Nuvem Azure — Script CLI Completo
+
+> **Atenção:** Todos os recursos são criados 100% via Azure CLI (nenhum passo manual no portal).
+
+```bash
+# Exporte as variáveis sensíveis ANTES de executar o script
+export DB_USER="petguardian"
+export DB_PASSWORD="<sua_senha_segura>"
+
+# Dê permissão de execução e execute a partir da pasta Java-Advanced
+# (o script faz o docker build do Dockerfile nessa pasta)
+cd Java-Advanced
+chmod +x ../script.sh
+../script.sh
+```
+
+O script executa as seguintes etapas automaticamente:
+
+| Etapa | Comando Principal | O que faz |
+| :---: | :--- | :--- |
+| 1 | `az group create` | Cria o Resource Group `rg-petguardian` |
+| 2 | `az acr create` | Cria o Azure Container Registry privado |
+| 3 | `az storage account create` | Cria a conta de armazenamento para o volume |
+| 4 | `az storage share create` | Cria o File Share `pgdata` para persistência do banco |
+| 5 | `docker pull / tag / push` | Envia imagem PostgreSQL 16 para o ACR |
+| 6 | `az container create` (banco) | Sobe o container PostgreSQL no ACI com volume montado |
+| 7 | `docker build / push` | Builda e envia a imagem da API Java para o ACR |
+| 8 | `az container create` (API) | Sobe o container da API Java no ACI |
+
+---
+
+### 4. Verificação do Deploy
+
+```bash
+# Lista todos os containers provisionados
+az container list --resource-group rg-petguardian --output table
+
+# Verifica logs da API
+az container logs --resource-group rg-petguardian --name aci-api-petguardian
+
+# Verifica logs do banco
+az container logs --resource-group rg-petguardian --name aci-db-petguardian
+
+# Acesse o Swagger em nuvem:
+# http://api-petguardian.brazilsouth.azurecontainer.io:8091/swagger-ui/index.html
+```
+
+---
+
+## 🧪 Guia de Testes — Evidência de Persistência (CRUD + SELECT)
+
+Este roteiro demonstra cada operação CRUD evidenciada diretamente no banco de dados PostgreSQL via `SELECT`. Execute na ordem para o vídeo de apresentação.
+
+### Acesso ao Banco via psql (dentro do container ACI)
+
+```bash
+az container exec \
+  --resource-group rg-petguardian \
+  --name aci-db-petguardian \
+  --exec-command "psql -U petguardian -d petguardian"
+```
+
+---
+
+### 📌 Passo 1 — Autenticação (obter token JWT)
+
+```bash
+# POST /usuarios/auth — Login para obter o Bearer Token
+curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/usuarios/auth \
+  -H "Content-Type: application/json" \
+  -d '{"email": "usuario@petguardian.com", "senha": "senha123"}'
+```
+
+---
+
+### 📌 Passo 2 — Criar Pet (INSERT + SELECT)
+
+**Criar uma raça:**
+```bash
+curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/pets/raca \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"nomeRaca": "Labrador"}'
+```
+
+**Criar um pet:**
+```bash
+curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/pets \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Rex",
+    "dataNasc": "2022-03-15",
+    "racaId": 1,
+    "porte": "GRANDE",
+    "sexo": "M",
+    "castrado": true
+  }'
+```
+
+**Evidência no banco (SELECT):**
+```sql
+-- Evidência de INSERT: confirma que o pet foi persistido
+SELECT id_pet, nome, data_nasc, porte, sexo, castrado
+FROM pet
+ORDER BY id_pet DESC
+LIMIT 5;
+```
+
+---
+
+### 📌 Passo 3 — Atualizar Pet (UPDATE + SELECT)
+
+```bash
+curl -X PUT http://api-petguardian.brazilsouth.azurecontainer.io:8091/pets/1 \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Rex Atualizado",
+    "dataNasc": "2022-03-15",
+    "racaId": 1,
+    "porte": "GRANDE",
+    "sexo": "M",
+    "castrado": false
+  }'
+```
+
+**Evidência no banco (SELECT):**
+```sql
+-- Evidência de UPDATE: confirma que os dados foram alterados
+SELECT id_pet, nome, castrado FROM pet WHERE id_pet = 1;
+```
+
+---
+
+### 📌 Passo 4 — Criar Tarefa para o Pet (INSERT + SELECT em tabela relacionada)
+
+```bash
+curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/tarefas \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "titulo": "Vacina Antirrábica",
+    "descricao": "Vacina anual obrigatória - dose de reforço",
+    "pontosTarefa": 50,
+    "prazo": "2026-10-01T10:00:00",
+    "petId": 1
+  }'
+```
+
+**Evidência no banco (SELECT em 2 tabelas relacionadas):**
+```sql
+-- Evidência de INSERT em tarefa + join com pet (2 tabelas relacionadas)
+SELECT t.id_tarefa, t.titulo, t.pontos_tarefa, t.prazo, s.nome_status, p.nome AS nome_pet
+FROM tarefa t
+JOIN status s ON s.id_status = t.status_id_status
+JOIN pet p ON p.id_pet = t.pet_id_pet
+ORDER BY t.id_tarefa DESC
+LIMIT 5;
+```
+
+---
+
+### 📌 Passo 5 — Concluir Tarefa (PATCH + SELECT)
+
+```bash
+curl -X PATCH http://api-petguardian.brazilsouth.azurecontainer.io:8091/tarefas/1/concluir \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+**Evidência no banco (SELECT):**
+```sql
+-- Evidência de PATCH: confirma que status mudou para CONCLUIDO e conclusao foi preenchido
+SELECT id_tarefa, titulo, conclusao, status_id_status FROM tarefa WHERE id_tarefa = 1;
+```
+
+---
+
+### 📌 Passo 6 — Excluir Tarefa (DELETE + SELECT)
+
+```bash
+curl -X DELETE http://api-petguardian.brazilsouth.azurecontainer.io:8091/tarefas/1 \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+**Evidência no banco (SELECT):**
+```sql
+-- Evidência de DELETE: confirma que o registro não existe mais
+SELECT COUNT(*) AS total_tarefas FROM tarefa WHERE id_tarefa = 1;
+-- Resultado esperado: total_tarefas = 0
+```
 
 ---
 
 ## 📋 Documentação de Rotas (OpenAPI / Swagger)
 
+Swagger disponível em: `http://api-petguardian.brazilsouth.azurecontainer.io:8091/swagger-ui/index.html`
+
+### Autenticação
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | /usuarios/auth | Login e geração do token JWT (Bearer) |
+| POST | /usuarios/refresh | Refresh do token de acesso |
+
+### Pets (Entidade CORE — CRUD Completo)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | /pets | Listar todos os pets |
+| GET | /pets/by-usuario | Listar pets do usuário autenticado |
+| GET | /pets/by-nome | Buscar pet por nome |
+| GET | /pets/{id} | Buscar pet por ID |
+| GET | /pets/{id}/historico | Buscar histórico clínico do pet |
+| GET | /pets/{id}/pontos | Buscar score acumulado do pet |
+| POST | /pets | Cadastrar novo pet |
+| PUT | /pets/{id} | Atualizar dados do pet |
+| DELETE | /pets/{id} | Remover pet |
+
+### Tarefas de Cuidado (Entidade CORE — CRUD Completo)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | /tarefas | Listar todas as tarefas |
+| GET | /tarefas/by-usuario | Listar tarefas do usuário autenticado |
+| GET | /tarefas/by-pet/{petId} | Listar tarefas de um pet |
+| GET | /tarefas/{id} | Buscar tarefa por ID |
+| GET | /tarefas/by-usuario/{usuarioId}/{id} | Buscar tarefa específica de um usuário |
+| GET | /tarefas/by-usuario/pontos | Score total de pontos do usuário |
+| POST | /tarefas | Criar nova tarefa de cuidado |
+| PUT | /tarefas/{id} | Atualizar tarefa |
+| PATCH | /tarefas/{id}/concluir | Marcar tarefa como concluída (acumula pontos) |
+| PATCH | /tarefas/{id}/desmarcar | Desmarcar conclusão da tarefa |
+| DELETE | /tarefas/{id} | Remover tarefa |
+
+### Rede de Cuidado — UsuarioPet (Círculo Colaborativo)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | /pets/{petId}/cuidadores | Listar cuidadores de um pet |
+| POST | /pets/{petId}/cuidadores | Adicionar co-cuidador ao pet |
+| DELETE | /pets/{petId}/cuidadores/{usuarioId} | Remover cuidador do pet |
+| PATCH | /pets/{petId}/responsavel-principal | Transferir responsabilidade principal |
+
 ### Usuários
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | /api/usuario | Listar todos os usuários |
-| GET | /api/usuario/{id} | Buscar usuário por ID |
-| GET | /api/usuario/by-email | Buscar usuário por e-mail |
-| GET | /api/usuario/{id}/score | Buscar score e progresso do usuário |
-| POST | /api/usuario | Cadastrar um novo usuário |
-| DELETE | /api/usuario/{id} | Remover um usuário |
+| GET | /usuarios | Listar todos os usuários |
+| GET | /usuarios/{id} | Buscar usuário por ID |
+| POST | /usuarios | Cadastrar novo usuário |
+| PUT | /usuarios/{id} | Atualizar usuário |
+| DELETE | /usuarios/{id} | Remover usuário |
 
-### Pets
+### Histórico Clínico
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | /api/pet | Listar todos os pets |
-| GET | /api/pet/{id} | Buscar pet por ID |
-| GET | /api/pet/by-raca/{racaId} | Buscar pets por raça |
-| GET | /api/pet/{id}/historico | Buscar histórico clínico e de cuidados do pet |
-| POST | /api/pet | Cadastrar um novo pet |
-| DELETE | /api/pet/{id} | Remover um pet |
+| GET | /historicos | Listar todos os históricos |
+| GET | /historicos/{id} | Buscar histórico por ID |
+| POST | /historicos | Registrar novo evento clínico |
+| DELETE | /historicos/{id} | Remover registro histórico |
 
-### Rede de Cuidado (UsuarioPet)
+### Trilhas & Módulos (Conteúdo Educativo)
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | /api/usuariopet | Listar todos os vínculos de rede de cuidado |
-| GET | /api/usuariopet/by-usuario/{usuarioId} | Listar pets vinculados a um usuário |
-| GET | /api/usuariopet/by-pet/{petId} | Listar cuidadores vinculados a um pet |
-| GET | /api/usuariopet/rede-cuidado/{usuarioId} | Buscar rede de cuidado colaborativo de um usuário |
-| POST | /api/usuariopet | Vincular um usuário a um pet |
-| POST | /api/usuariopet/invite/by-usuario | Convidar cuidador por ID (Exclusivo para Responsável Principal) |
-| POST | /api/usuariopet/invite/by-email | Convidar cuidador por E-mail (Exclusivo para Responsável Principal) |
-| DELETE | /api/usuariopet/{usuarioId}/{petId} | Remover cuidador da rede de um pet |
-
-### Tarefas de Cuidado
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/tarefa | Listar todas as tarefas |
-| GET | /api/tarefa/{id} | Buscar tarefa por ID |
-| GET | /api/tarefa/by-pet/{petId} | Listar tarefas de um pet |
-| GET | /api/tarefa/by-usuario/{usuarioId} | Listar tarefas vinculadas a um usuário |
-| GET | /api/tarefa/by-veterinario/{veterinarioId} | Listar tarefas prescritas por um veterinário |
-| GET | /api/tarefa/by-status/{statusId} | Listar tarefas por status |
-| POST | /api/tarefa | Prescrever/cadastrar uma nova tarefa para um pet |
-| POST | /api/tarefa/{id}/concluir | Concluir tarefa (computando os pontos para o score do usuário) |
-| DELETE | /api/tarefa/{id} | Deletar uma tarefa |
-
-### Endereços
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/endereco | Listar todos os endereços |
-| GET | /api/endereco/{id} | Buscar endereço por ID |
-| POST | /api/endereco | Cadastrar endereço buscando dados automaticamente via ViaCEP |
-| DELETE | /api/endereco/{id} | Remover um endereço |
-
-### Vínculo de Endereço (UsuarioEndereco)
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/usuarioendereco | Listar todas as relações usuário-endereço |
-| GET | /api/usuarioendereco/by-usuario/{usuarioId} | Listar endereços vinculados a um usuário |
-| GET | /api/usuarioendereco/by-endereco/{enderecoId} | Listar usuários vinculados a um endereço |
-| POST | /api/usuarioendereco | Vincular um endereço a um usuário |
-| DELETE | /api/usuarioendereco/{usuarioId}/{enderecoId} | Desvincular endereço de um usuário |
-
-### Telefones
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/telefone | Listar todos os telefones |
-| GET | /api/telefone/{id} | Buscar telefone por ID |
-| POST | /api/telefone | Cadastrar um novo telefone |
-| DELETE | /api/telefone/{id} | Remover um telefone |
-
-### Raças de Pets
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/raca | Listar todas as raças |
-| GET | /api/raca/{id} | Buscar raça por ID |
-| POST | /api/raca | Cadastrar uma nova raça |
-| DELETE | /api/raca/{id} | Remover uma raça |
-
-### Cidades
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/cidade | Listar todas as cidades |
-| GET | /api/cidade/{id} | Buscar cidade por ID |
-| GET | /api/cidade/by-estado/{estadoId} | Listar cidades de um estado |
-| POST | /api/cidade | Cadastrar uma nova cidade |
-| DELETE | /api/cidade/{id} | Remover uma cidade |
-
-### Bairros
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/bairro | Listar todos os bairros |
-| GET | /api/bairro/{id} | Buscar bairro por ID |
-| GET | /api/bairro/by-cidade/{cidadeId} | Listar bairros de uma cidade |
-| POST | /api/bairro | Cadastrar um novo bairro |
-| DELETE | /api/bairro/{id} | Remover um bairro |
-
-### Estados
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/estado | Listar todos os estados |
-| GET | /api/estado/{id} | Buscar estado por ID |
-| POST | /api/estado | Cadastrar um novo estado |
-| DELETE | /api/estado/{id} | Remover um estado |
-
-### Status
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/status | Listar todos os status |
-| GET | /api/status/{id} | Buscar status por ID |
-| POST | /api/status | Cadastrar um novo status |
-| DELETE | /api/status/{id} | Remover um status |
+| GET | /trilhas | Listar trilhas educativas do pet |
+| GET | /modulos | Listar módulos de uma trilha |
+| GET | /aulas | Listar aulas de um módulo |
