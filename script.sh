@@ -4,24 +4,25 @@
 # Disciplina: DevOps Tools & Cloud Computing — Sprint 3
 # Aplicação: Java Spring Boot 4.1.1 + PostgreSQL 16
 # =============================================================================
-# ATENÇÃO: Antes de executar, exporte as variáveis sensíveis no terminal:
-#   export DB_PASSWORD="<sua_senha_segura>"
+# Executar no Git Bash. Antes de rodar:
+#   export DB_PASSWORD="petguardian_senha"
 #   export DB_USER="petguardian"
 # =============================================================================
 
 set -euo pipefail
+export MSYS_NO_PATHCONV=1
 
 # -----------------------------------------------------------------------------
 # 1. Variáveis de Configuração
 # -----------------------------------------------------------------------------
 RESOURCE_GROUP="rg-petguardian"
-LOCATION="brazilsouth"
+LOCATION="southafricanorth"
 ACR_NAME="acrpetguardian"
 STORAGE_ACCOUNT_NAME="stpetguardiandata"
 SHARE_NAME="pgdata"
 DB_NAME="petguardian"
 
-# Variáveis sensíveis — obrigatório exportar antes de executar o script
+# Variáveis sensíveis obrigatórias
 : "${DB_PASSWORD:?Exporte a variável DB_PASSWORD antes de executar}"
 : "${DB_USER:?Exporte a variável DB_USER antes de executar}"
 
@@ -86,6 +87,7 @@ az container create \
   --resource-group "$RESOURCE_GROUP" \
   --name aci-db-petguardian \
   --image "${ACR_LOGIN_SERVER}/postgres-db-petguardian:v1" \
+  --os-type Linux \
   --cpu 1 \
   --memory 1.5 \
   --registry-login-server "${ACR_LOGIN_SERVER}" \
@@ -97,19 +99,23 @@ az container create \
     POSTGRES_DB="$DB_NAME" \
     POSTGRES_USER="$DB_USER" \
     POSTGRES_PASSWORD="$DB_PASSWORD" \
+    PGDATA="/var/lib/postgresql/data/pgdata" \
   --azure-file-volume-account-name "$STORAGE_ACCOUNT_NAME" \
   --azure-file-volume-account-key "$STORAGE_KEY" \
   --azure-file-volume-share-name "$SHARE_NAME" \
   --azure-file-volume-mount-path "/var/lib/postgresql/data"
 
-# FQDN do banco criado acima
 DB_HOST="postgres-petguardian.${LOCATION}.azurecontainer.io"
+
+echo "Aguardando 25 segundos para o PostgreSQL concluir a inicialização..."
+sleep 25
 
 # -----------------------------------------------------------------------------
 # 7. Build e Push da Imagem da API Java para o ACR
 # -----------------------------------------------------------------------------
 echo "[7/8] Buildando e enviando imagem da API Java para o ACR..."
-docker build -t "${ACR_LOGIN_SERVER}/api-petguardian:v1" .
+# Se executado da raiz do repositório, compila a pasta Java-Advanced
+docker build -t "${ACR_LOGIN_SERVER}/api-petguardian:v1" ./Java-Advanced
 docker push "${ACR_LOGIN_SERVER}/api-petguardian:v1"
 
 # -----------------------------------------------------------------------------
@@ -120,6 +126,7 @@ az container create \
   --resource-group "$RESOURCE_GROUP" \
   --name aci-api-petguardian \
   --image "${ACR_LOGIN_SERVER}/api-petguardian:v1" \
+  --os-type Linux \
   --cpu 1 \
   --memory 1.5 \
   --registry-login-server "${ACR_LOGIN_SERVER}" \
@@ -132,7 +139,8 @@ az container create \
     PGPORT="5432" \
     PGDATABASE="$DB_NAME" \
     PGUSER="$DB_USER" \
-    PGPASSWORD="$DB_PASSWORD"
+    PGPASSWORD="$DB_PASSWORD" \
+    SPRING_DOCKER_COMPOSE_ENABLED="false"
 
 # -----------------------------------------------------------------------------
 # 9. Verificação dos Containers Criados

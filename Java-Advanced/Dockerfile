@@ -1,7 +1,7 @@
 # ============================================================
 # Stage 1 — BUILD: compila o projeto com Gradle
 # ============================================================
-FROM gradle:8.12-jdk17 AS build
+FROM gradle:jdk17 AS build
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ WORKDIR /app
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Copia o JAR gerado no estágio de build
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/pet-guardian-0.0.1-SNAPSHOT.jar app.jar
 
 # Copia os recursos de chaves RSA para JWT
 COPY --from=build /app/src/main/resources/keys/ /app/keys/
