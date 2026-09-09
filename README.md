@@ -62,7 +62,7 @@ O **PetGuardian** resolve o problema da descentralização do cuidado diário de
 
 A arquitetura da solução utiliza exclusivamente a **Opção 1 (ACR + ACI)** do edital, com todos os recursos provisionados 100% via Azure CLI:
 
-![Desenho Macro](docs/sprint-3.jpeg)
+![Desenho Macro](docs/challenge3-petguardian.drawio.png)
 
 ### Fluxo da Arquitetura
 
@@ -244,7 +244,7 @@ az container logs --resource-group rg-petguardian --name aci-api-petguardian
 az container logs --resource-group rg-petguardian --name aci-db-petguardian
 
 # Acesse o Swagger em nuvem:
-# http://api-petguardian.brazilsouth.azurecontainer.io:8091/swagger-ui/index.html
+# http://api-petguardian.southafricanorth.azurecontainer.io:8091/swagger-ui/index.html
 ```
 
 ---
@@ -268,7 +268,7 @@ az container exec \
 
 ```bash
 # POST /usuarios/auth — Login para obter o Bearer Token
-curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/usuarios/auth \
+curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/usuarios/auth \
   -H "Content-Type: application/json" \
   -d '{"email": "usuario@petguardian.com", "senha": "senha123"}'
 ```
@@ -279,7 +279,7 @@ curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/usuarios/
 
 **Criar uma raça:**
 ```bash
-curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/pets/raca \
+curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/pets/raca \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{"nomeRaca": "Labrador"}'
@@ -287,7 +287,7 @@ curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/pets/raca
 
 **Criar um pet:**
 ```bash
-curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/pets \
+curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/pets \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -314,7 +314,7 @@ LIMIT 5;
 ### 📌 Passo 3 — Atualizar Pet (UPDATE + SELECT)
 
 ```bash
-curl -X PUT http://api-petguardian.brazilsouth.azurecontainer.io:8091/pets/1 \
+curl -X PUT http://api-petguardian.southafricanorth.azurecontainer.io:8091/pets/1 \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -338,7 +338,7 @@ SELECT id_pet, nome, castrado FROM pet WHERE id_pet = 1;
 ### 📌 Passo 4 — Criar Tarefa para o Pet (INSERT + SELECT em tabela relacionada)
 
 ```bash
-curl -X POST http://api-petguardian.brazilsouth.azurecontainer.io:8091/tarefas \
+curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/tarefas \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -366,7 +366,7 @@ LIMIT 5;
 ### 📌 Passo 5 — Concluir Tarefa (PATCH + SELECT)
 
 ```bash
-curl -X PATCH http://api-petguardian.brazilsouth.azurecontainer.io:8091/tarefas/1/concluir \
+curl -X PATCH http://api-petguardian.southafricanorth.azurecontainer.io:8091/tarefas/1/concluir \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
@@ -381,7 +381,7 @@ SELECT id_tarefa, titulo, conclusao, status_id_status FROM tarefa WHERE id_taref
 ### 📌 Passo 6 — Excluir Tarefa (DELETE + SELECT)
 
 ```bash
-curl -X DELETE http://api-petguardian.brazilsouth.azurecontainer.io:8091/tarefas/1 \
+curl -X DELETE http://api-petguardian.southafricanorth.azurecontainer.io:8091/tarefas/1 \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
@@ -396,7 +396,7 @@ SELECT COUNT(*) AS total_tarefas FROM tarefa WHERE id_tarefa = 1;
 
 ## 📋 Documentação de Rotas (OpenAPI / Swagger)
 
-Swagger disponível em: `http://api-petguardian.brazilsouth.azurecontainer.io:8091/swagger-ui/index.html`
+Swagger disponível em: `http://api-petguardian.southafricanorth.azurecontainer.io:8091/swagger-ui/index.html`
 
 ### Autenticação
 | Método | Rota | Descrição |
