@@ -2,7 +2,7 @@
 # PetGuardian -- Deploy Completo no Azure (ACR + ACI)
 # Disciplina: DevOps Tools & Cloud Computing -- Sprint 3
 # Aplicacao: Java Spring Boot 4.1.1 + PostgreSQL 16
-# Adaptado para PowerShell / Windows
+# Adaptado para PowerShell / Windows (.ps1)
 # =============================================================================
 
 # -----------------------------------------------------------------------------

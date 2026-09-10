@@ -32,7 +32,8 @@ DB_NAME="petguardian"
 echo "[1/8] Criando Resource Group: $RESOURCE_GROUP em $LOCATION..."
 az group create \
   --name "$RESOURCE_GROUP" \
-  --location "$LOCATION"
+  --location "$LOCATION" \
+  --output table
 
 # -----------------------------------------------------------------------------
 # 3. Azure Container Registry (ACR)
@@ -42,13 +43,16 @@ az acr create \
   --resource-group "$RESOURCE_GROUP" \
   --name "$ACR_NAME" \
   --sku Basic \
-  --admin-enabled true
+  --admin-enabled true \
+  --output table
 
 az acr login --name "$ACR_NAME"
 
 ACR_LOGIN_SERVER=$(az acr show --name "$ACR_NAME" --query "loginServer" -o tsv)
 ACR_USERNAME=$(az acr credential show --name "$ACR_NAME" --query "username" -o tsv)
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
+
+echo "ACR Login Server: $ACR_LOGIN_SERVER"
 
 # -----------------------------------------------------------------------------
 # 4. Persistência de Dados — Azure Storage Account + File Share
@@ -58,7 +62,8 @@ az storage account create \
   --resource-group "$RESOURCE_GROUP" \
   --name "$STORAGE_ACCOUNT_NAME" \
   --location "$LOCATION" \
-  --sku Standard_LRS
+  --sku Standard_LRS \
+  --output table
 
 STORAGE_KEY=$(az storage account keys list \
   --resource-group "$RESOURCE_GROUP" \
@@ -69,7 +74,8 @@ echo "[4/8] Criando File Share para volume de dados do PostgreSQL..."
 az storage share create \
   --name "$SHARE_NAME" \
   --account-name "$STORAGE_ACCOUNT_NAME" \
-  --account-key "$STORAGE_KEY"
+  --account-key "$STORAGE_KEY" \
+  --output table
 
 # -----------------------------------------------------------------------------
 # 5. Envio da Imagem do PostgreSQL para o ACR
@@ -90,6 +96,7 @@ az container create \
   --os-type Linux \
   --cpu 1 \
   --memory 1.5 \
+  --restart-policy Always \
   --registry-login-server "${ACR_LOGIN_SERVER}" \
   --registry-username "$ACR_USERNAME" \
   --registry-password "$ACR_PASSWORD" \
@@ -103,19 +110,30 @@ az container create \
   --azure-file-volume-account-name "$STORAGE_ACCOUNT_NAME" \
   --azure-file-volume-account-key "$STORAGE_KEY" \
   --azure-file-volume-share-name "$SHARE_NAME" \
-  --azure-file-volume-mount-path "/var/lib/postgresql/data"
+  --azure-file-volume-mount-path "/var/lib/postgresql/data" \
+  --output table
 
 DB_HOST="postgres-petguardian.${LOCATION}.azurecontainer.io"
+DB_IP=$(az container show --resource-group "$RESOURCE_GROUP" --name aci-db-petguardian --query "ipAddress.ip" -o tsv || echo "")
+DB_TARGET="${DB_IP:-$DB_HOST}"
 
-echo "Aguardando 25 segundos para o PostgreSQL concluir a inicialização..."
-sleep 25
+echo ""
+echo "Aguardando PostgreSQL inicializar e abrir a porta 5432 (alvo: $DB_TARGET)..."
+for i in {1..24}; do
+  sleep 5
+  if timeout 3 bash -c "cat < /dev/null > /dev/tcp/${DB_TARGET}/5432" 2>/dev/null; then
+    echo "✅ PostgreSQL está pronto e aceitando conexões na porta 5432!"
+    break
+  fi
+  echo "  [$i/24] PostgreSQL ainda inicializando... ($((i * 5))s decorridos)"
+done
 
 # -----------------------------------------------------------------------------
 # 7. Build e Push da Imagem da API Java para o ACR
 # -----------------------------------------------------------------------------
-echo "[7/8] Buildando e enviando imagem da API Java para o ACR..."
-# Se executado da raiz do repositório, compila a pasta Java-Advanced
-docker build -t "${ACR_LOGIN_SERVER}/api-petguardian:v1" ./Java-Advanced
+echo ""
+echo "[7/8] Buildando e enviando imagem da API Java ($JAVA_DIR) para o ACR..."
+docker build -t "${ACR_LOGIN_SERVER}/api-petguardian:v1" "$JAVA_DIR"
 docker push "${ACR_LOGIN_SERVER}/api-petguardian:v1"
 
 # -----------------------------------------------------------------------------
@@ -129,27 +147,72 @@ az container create \
   --os-type Linux \
   --cpu 1 \
   --memory 1.5 \
+  --restart-policy Always \
   --registry-login-server "${ACR_LOGIN_SERVER}" \
   --registry-username "$ACR_USERNAME" \
   --registry-password "$ACR_PASSWORD" \
   --dns-name-label api-petguardian \
   --ports 8091 \
   --environment-variables \
-    PGHOST="$DB_HOST" \
+    PGHOST="$DB_TARGET" \
     PGPORT="5432" \
     PGDATABASE="$DB_NAME" \
     PGUSER="$DB_USER" \
     PGPASSWORD="$DB_PASSWORD" \
-    SPRING_DOCKER_COMPOSE_ENABLED="false"
-
-# -----------------------------------------------------------------------------
-# 9. Verificação dos Containers Criados
-# -----------------------------------------------------------------------------
-echo ""
-echo "=== Deploy concluído! Verificando containers provisionados... ==="
-az container list --resource-group "$RESOURCE_GROUP" --output table
+    SPRING_DATASOURCE_URL="jdbc:postgresql://${DB_TARGET}:5432/${DB_NAME}" \
+    SPRING_DATASOURCE_USERNAME="$DB_USER" \
+    SPRING_DATASOURCE_PASSWORD="$DB_PASSWORD" \
+    SPRING_DOCKER_COMPOSE_ENABLED="false" \
+  --output table
 
 API_FQDN="api-petguardian.${LOCATION}.azurecontainer.io"
+API_IP=$(az container show --resource-group "$RESOURCE_GROUP" --name aci-api-petguardian --query "ipAddress.ip" -o tsv || echo "")
+
+# -----------------------------------------------------------------------------
+# 9. Verificação de Saúde e Inicialização da API Java
+# -----------------------------------------------------------------------------
 echo ""
-echo "✅ Swagger disponível em: http://${API_FQDN}:8091/swagger-ui/index.html"
-echo "✅ Banco disponível em: ${DB_HOST}:5432"
+echo "=== Aguardando ACI baixar a imagem e iniciar a JVM (40 a 75 segundos) ==="
+HEALTH_TARGET="${API_IP:-$API_FQDN}"
+
+for i in {1..30}; do
+  sleep 5
+  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${HEALTH_TARGET}:8091/actuator/health" || echo "000")
+  if [ "$HTTP_CODE" = "200" ]; then
+    echo ""
+    echo "✅ Spring Boot inicializado com sucesso (Health Check HTTP 200 OK)!"
+    break
+  fi
+
+  LOGS=$(az container logs --resource-group "$RESOURCE_GROUP" --name aci-api-petguardian 2>/dev/null || true)
+  if echo "$LOGS" | grep -q "Started PetGuardianApplication"; then
+    echo ""
+    echo "✅ Log do container confirmou: 'Started PetGuardianApplication'!"
+    break
+  fi
+
+  echo "  [$i/30] Aguardando API inicializar... ($((i * 5))s decorridos)"
+done
+
+echo ""
+echo "=== Últimos logs do container da API Java ==="
+az container logs --resource-group "$RESOURCE_GROUP" --name aci-api-petguardian --tail 25 || true
+
+echo ""
+echo "=== Status Final dos Containers Provisionados ==="
+az container list --resource-group "$RESOURCE_GROUP" --output table
+
+echo ""
+echo "================================================================="
+echo "✅ DEPLOY FINALIZADO COM SUCESSO!"
+echo "================================================================="
+echo "📖 Swagger UI (FQDN): http://${API_FQDN}:8091/swagger-ui/index.html"
+if [ -n "$API_IP" ]; then
+  echo "📖 Swagger UI (IP):   http://${API_IP}:8091/swagger-ui/index.html"
+fi
+echo "🩺 Health Check:      http://${API_FQDN}:8091/actuator/health"
+echo "🗄️ PostgreSQL (FQDN): ${DB_HOST}:5432"
+if [ -n "$DB_IP" ]; then
+  echo "🗄️ PostgreSQL (IP):   ${DB_IP}:5432"
+fi
+echo "================================================================="

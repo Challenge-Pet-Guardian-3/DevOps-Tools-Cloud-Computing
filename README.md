@@ -97,11 +97,12 @@ DevOps-Tools-Cloud-Computing/
   │   ├── compose.yml          # Docker Compose para ambiente local de desenvolvimento
   │   └── Dockerfile           # Dockerfile multi-stage com usuário non-root (appuser)
   ├── docs/
-  │   ├── sprint-3.jpeg        # Diagrama de arquitetura Cloud Azure
-  │   ├── sprint-3.drawio      # Fonte editável do diagrama (Draw.io)
+  │   ├── challenge3-petguardian.drawio.png # Diagrama oficial de arquitetura Cloud Azure
   │   ├── Logical.png          # Modelo lógico do banco de dados
   │   └── Relational.png       # Modelo relacional do banco de dados
-  ├── script.sh                # Script Azure CLI de provisionamento completo (IaC)
+  ├── script.sh                # Script Azure CLI para Bash / Git Bash / Linux
+  ├── script-powershell.sh     # Script Azure CLI adaptado para PowerShell / Windows
+  ├── script-powershell.ps1    # Script nativo PowerShell (.ps1) para Windows
   └── script_bd.sql            # DDL das tabelas CORE com comentários (PostgreSQL)
 ```
 
@@ -122,8 +123,8 @@ DevOps-Tools-Cloud-Computing/
 O container da API **não executa como root ou admin**, conforme requisito obrigatório do edital (item 8.2, penalidade de -10 pts). O `Dockerfile` está em `Java-Advanced/Dockerfile`:
 
 ```dockerfile
-# Stage 1 — BUILD
-FROM gradle:8.12-jdk17 AS build
+# Stage 1 — BUILD: compilação com Gradle
+FROM gradle:jdk17 AS build
 WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle/ gradle/
@@ -131,14 +132,14 @@ RUN gradle dependencies --no-daemon || true
 COPY src/ src/
 RUN gradle bootJar --no-daemon -x test
 
-# Stage 2 — RUNTIME (imagem mínima de produção)
+# Stage 2 — RUNTIME: imagem mínima de produção
 FROM eclipse-temurin:17-jre-alpine AS runtime
 WORKDIR /app
 
 # Cria usuário e grupo sem privilégios administrativos
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/pet-guardian-0.0.1-SNAPSHOT.jar app.jar
 COPY --from=build /app/src/main/resources/keys/ /app/keys/
 RUN chown -R appuser:appgroup /app
 
@@ -203,17 +204,35 @@ docker run -d \
 ### 3. Deploy na Nuvem Azure — Script CLI Completo
 
 > **Atenção:** Todos os recursos são criados 100% via Azure CLI (nenhum passo manual no portal).
+> Os scripts possuem validação de integridade embutida: aguardam a porta 5432 do PostgreSQL aceitar conexões e monitoram a inicialização da API até o endpoint `/actuator/health` retornar `HTTP 200 OK`, exibindo os logs reais e as URLs de acesso.
 
+#### No Windows (PowerShell):
+```powershell
+cd DevOps-Tools-Cloud-Computing
+
+# Opcional: configurar credenciais e região (padrão: canadacentral)
+$env:DB_USER = "petguardian"
+$env:DB_PASSWORD = "petguardian_senha"
+$env:LOCATION = "canadacentral"
+
+# Executar o script de automação:
+.\script-powershell.sh
+# ou:
+.\script-powershell.ps1
+```
+
+#### No Linux / macOS / Git Bash:
 ```bash
-# Exporte as variáveis sensíveis ANTES de executar o script
-export DB_USER="petguardian"
-export DB_PASSWORD="<sua_senha_segura>"
+cd DevOps-Tools-Cloud-Computing
 
-# Dê permissão de execução e execute a partir da pasta Java-Advanced
-# (o script faz o docker build do Dockerfile nessa pasta)
-cd Java-Advanced
-chmod +x ../script.sh
-../script.sh
+# Exporte as variáveis sensíveis
+export DB_USER="petguardian"
+export DB_PASSWORD="petguardian_senha"
+export LOCATION="canadacentral"
+
+# Dê permissão e execute:
+chmod +x ./script.sh
+./script.sh
 ```
 
 O script executa as seguintes etapas automaticamente:
@@ -225,9 +244,10 @@ O script executa as seguintes etapas automaticamente:
 | 3 | `az storage account create` | Cria a conta de armazenamento para o volume |
 | 4 | `az storage share create` | Cria o File Share `pgdata` para persistência do banco |
 | 5 | `docker pull / tag / push` | Envia imagem PostgreSQL 16 para o ACR |
-| 6 | `az container create` (banco) | Sobe o container PostgreSQL no ACI com volume montado |
+| 6 | `az container create` (banco) | Sobe o container PostgreSQL no ACI com volume montado e testa a porta 5432 |
 | 7 | `docker build / push` | Builda e envia a imagem da API Java para o ACR |
-| 8 | `az container create` (API) | Sobe o container da API Java no ACI |
+| 8 | `az container create` (API) | Sobe o container da API Java no ACI com roteamento resiliente por IP |
+| 9 | `Health Check & Logs` | Monitora subida no `/actuator/health` e exibe logs e endpoints finais |
 
 ---
 
@@ -244,7 +264,8 @@ az container logs --resource-group rg-petguardian --name aci-api-petguardian
 az container logs --resource-group rg-petguardian --name aci-db-petguardian
 
 # Acesse o Swagger em nuvem:
-# http://api-petguardian.southafricanorth.azurecontainer.io:8091/swagger-ui/index.html
+# http://api-petguardian.<regiao>.azurecontainer.io:8091/swagger-ui/index.html
+# (ou pelo IP público exibido no término do script)
 ```
 
 ---
@@ -267,8 +288,8 @@ az container exec \
 ### 📌 Passo 1 — Autenticação (obter token JWT)
 
 ```bash
-# POST /usuarios/auth — Login para obter o Bearer Token
-curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/usuarios/auth \
+# POST /login — Login para obter o Bearer Token
+curl -X POST http://api-petguardian.canadacentral.azurecontainer.io:8091/login \
   -H "Content-Type: application/json" \
   -d '{"email": "usuario@petguardian.com", "senha": "senha123"}'
 ```
@@ -279,7 +300,7 @@ curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/usua
 
 **Criar uma raça:**
 ```bash
-curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/pets/raca \
+curl -X POST http://api-petguardian.canadacentral.azurecontainer.io:8091/pets/raca \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{"nomeRaca": "Labrador"}'
@@ -287,7 +308,7 @@ curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/pets
 
 **Criar um pet:**
 ```bash
-curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/pets \
+curl -X POST http://api-petguardian.canadacentral.azurecontainer.io:8091/pets \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -314,7 +335,7 @@ LIMIT 5;
 ### 📌 Passo 3 — Atualizar Pet (UPDATE + SELECT)
 
 ```bash
-curl -X PUT http://api-petguardian.southafricanorth.azurecontainer.io:8091/pets/1 \
+curl -X PUT http://api-petguardian.canadacentral.azurecontainer.io:8091/pets/1 \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -338,7 +359,7 @@ SELECT id_pet, nome, castrado FROM pet WHERE id_pet = 1;
 ### 📌 Passo 4 — Criar Tarefa para o Pet (INSERT + SELECT em tabela relacionada)
 
 ```bash
-curl -X POST http://api-petguardian.southafricanorth.azurecontainer.io:8091/tarefas \
+curl -X POST http://api-petguardian.canadacentral.azurecontainer.io:8091/tarefas \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -366,7 +387,7 @@ LIMIT 5;
 ### 📌 Passo 5 — Concluir Tarefa (PATCH + SELECT)
 
 ```bash
-curl -X PATCH http://api-petguardian.southafricanorth.azurecontainer.io:8091/tarefas/1/concluir \
+curl -X PATCH http://api-petguardian.canadacentral.azurecontainer.io:8091/tarefas/1/concluir \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
@@ -381,7 +402,7 @@ SELECT id_tarefa, titulo, conclusao, status_id_status FROM tarefa WHERE id_taref
 ### 📌 Passo 6 — Excluir Tarefa (DELETE + SELECT)
 
 ```bash
-curl -X DELETE http://api-petguardian.southafricanorth.azurecontainer.io:8091/tarefas/1 \
+curl -X DELETE http://api-petguardian.canadacentral.azurecontainer.io:8091/tarefas/1 \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
@@ -396,13 +417,12 @@ SELECT COUNT(*) AS total_tarefas FROM tarefa WHERE id_tarefa = 1;
 
 ## 📋 Documentação de Rotas (OpenAPI / Swagger)
 
-Swagger disponível em: `http://api-petguardian.southafricanorth.azurecontainer.io:8091/swagger-ui/index.html`
+Swagger disponível em: `http://api-petguardian.<regiao>.azurecontainer.io:8091/swagger-ui/index.html` (ou pelo IP público)
 
 ### Autenticação
 | Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | /usuarios/auth | Login e geração do token JWT (Bearer) |
-| POST | /usuarios/refresh | Refresh do token de acesso |
+|:---:|:---|:---|
+| POST | /login | Login e geração do token JWT (Bearer) |
 
 ### Pets (Entidade CORE — CRUD Completo)
 | Método | Rota | Descrição |
