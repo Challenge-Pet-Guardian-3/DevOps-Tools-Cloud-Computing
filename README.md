@@ -100,9 +100,7 @@ DevOps-Tools-Cloud-Computing/
   │   ├── challenge3-petguardian.drawio.png # Diagrama oficial de arquitetura Cloud Azure
   │   ├── Logical.png          # Modelo lógico do banco de dados
   │   └── Relational.png       # Modelo relacional do banco de dados
-  ├── script.sh                # Script Azure CLI para Bash / Git Bash / Linux
-  ├── script-powershell.sh     # Script Azure CLI adaptado para PowerShell / Windows
-  ├── script-powershell.ps1    # Script nativo PowerShell (.ps1) para Windows
+  ├── script-novo.sh           # Script Azure CLI limpo e otimizado para Git Bash / Linux
   └── script_bd.sql            # DDL das tabelas CORE com comentários (PostgreSQL)
 ```
 
@@ -231,8 +229,8 @@ export DB_PASSWORD="petguardian_senha"
 export LOCATION="canadacentral"
 
 # Dê permissão e execute:
-chmod +x ./script.sh
-./script.sh
+chmod +x ./script-novo.sh
+./script-novo.sh
 ```
 
 O script executa as seguintes etapas automaticamente:
