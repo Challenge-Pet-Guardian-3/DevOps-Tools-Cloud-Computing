@@ -21,6 +21,11 @@ FROM eclipse-temurin:17-jre-alpine AS runtime
 
 WORKDIR /app
 
+# Instala tzdata e configura fuso horário oficial de Brasília (America/Sao_Paulo)
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
+    echo "America/Sao_Paulo" > /etc/timezone
+
 # Cria usuário e grupo sem privilégios administrativos (non-root)
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
@@ -33,9 +38,13 @@ COPY --from=build /app/src/main/resources/keys/ /app/keys/
 # Define permissões corretas para o usuário não privilegiado
 RUN chown -R appuser:appgroup /app
 
+# Define timezone padrão no ambiente Linux
+ENV TZ=America/Sao_Paulo
+
 # Executa como usuário sem privilégios administrativos
 USER appuser
 
 EXPOSE 8091
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=America/Sao_Paulo", "-jar", "app.jar"]
+
