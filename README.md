@@ -309,11 +309,14 @@ curl -X POST "$API_URL/usuarios" \
 
 **Consulta de confirmação no PostgreSQL:**
 ```sql
-SELECT id_usuario, nome, email, role, ddd, numero_telefone 
-FROM usuario 
-ORDER BY id_usuario DESC 
+SELECT u.id_usuario, u.nome, u.email, u.role, t.num_ddd, t.num_tel 
+FROM usuario u 
+JOIN telefone t ON t.id_telefone = u.telefone_id_telefone 
+ORDER BY u.id_usuario DESC 
 LIMIT 5;
 ```
+
+> **Nota:** Se o usuário já tiver sido cadastrado anteriormente, o banco acusará violação de chave única no campo `email`. Nesse caso, você já pode avançar diretamente para o **Passo 2 (Login)**.
 
 ---
 
@@ -405,10 +408,10 @@ Crie uma tarefa de cuidado vinculada ao cuidador e ao pet:
 # POST /tarefas — Agendamento de tarefa com pontuação
 curl -X POST "$API_URL/tarefas" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/json; charset=utf-8" \
   -d '{
-    "titulo": "Vacina Antirrábica",
-    "descricao": "Dose de reforço anual",
+    "titulo": "Vacina Antirrabica",
+    "descricao": "Dose de reforco anual",
     "pontosTarefa": 50,
     "prazo": "2026-10-01T10:00:00",
     "status": "PENDENTE",
