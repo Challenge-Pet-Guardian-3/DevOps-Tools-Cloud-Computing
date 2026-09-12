@@ -285,13 +285,50 @@ API_URL="http://api-petg-01bd2f0c.southafricanorth.azurecontainer.io:8091"
 
 ---
 
-### 📌 Passo 1 — Autenticação (Obtenção do Token JWT)
+### 📌 Passo 1 — Cadastro de Usuário / Cuidador (INSERT + SELECT)
+
+Como o banco no ACI inicia limpo, o primeiro passo obrigatório é criar um cuidador no sistema via endpoint público (`/usuarios`):
 
 ```bash
-# POST /login — Autenticação de cuidador cadastrado
+# POST /usuarios — Cadastro de cuidador com validação de CEP e telefone
+curl -X POST "$API_URL/usuarios" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Usuario Teste",
+    "email": "usuario@petguardian.com",
+    "senha": "senha123",
+    "ddd": "11",
+    "numeroTelefone": "987654321",
+    "role": "COMUM",
+    "endereco": {
+      "cep": "01001-000",
+      "numero": "100"
+    }
+  }'
+```
+
+**Consulta de confirmação no PostgreSQL:**
+```sql
+SELECT id_usuario, nome, email, role, ddd, numero_telefone 
+FROM usuario 
+ORDER BY id_usuario DESC 
+LIMIT 5;
+```
+
+---
+
+### 📌 Passo 2 — Autenticação (Obtenção do Token JWT)
+
+Com o usuário persistido no banco, realize a autenticação para gerar o Bearer Token assinado:
+
+```bash
+# POST /login — Autenticação com e-mail e senha cadastrados
 curl -X POST "$API_URL/login" \
   -H "Content-Type: application/json" \
-  -d '{"email": "usuario@petguardian.com", "senha": "senha123"}'
+  -d '{
+    "email": "usuario@petguardian.com", 
+    "senha": "senha123"
+  }'
 ```
 
 Guarde o token retornado para os passos seguintes:
@@ -301,28 +338,23 @@ TOKEN="<SEU_JWT_TOKEN_AQUI>"
 
 ---
 
-### 📌 Passo 2 — Cadastro de Pet (INSERT + SELECT)
+### 📌 Passo 3 — Cadastro de Pet (INSERT + SELECT)
 
-**1. Cadastrar raça:**
-```bash
-curl -X POST "$API_URL/pets/raca" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"nomeRaca": "Golden Retriever"}'
-```
+Cadastre um pet associando ao usuário autenticado (`usuarioId: 1`). A raça é resolvida e vinculada automaticamente pelo serviço backend:
 
-**2. Cadastrar novo pet:**
 ```bash
+# POST /pets — Cadastro de animal de estimação
 curl -X POST "$API_URL/pets" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nome": "Max",
     "dataNasc": "2023-05-10",
-    "racaId": 1,
+    "raca": "Golden Retriever",
     "porte": "GRANDE",
     "sexo": "M",
-    "castrado": true
+    "castrado": true,
+    "usuarioId": 1
   }'
 ```
 
@@ -336,19 +368,23 @@ LIMIT 5;
 
 ---
 
-### 📌 Passo 3 — Atualização de Dados do Pet (UPDATE + SELECT)
+### 📌 Passo 4 — Atualização de Dados do Pet (UPDATE + SELECT)
+
+Atualize os dados cadastrais do pet informando seu identificador:
 
 ```bash
+# PUT /pets/{id} — Atualização cadastral
 curl -X PUT "$API_URL/pets/1" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nome": "Max Atualizado",
     "dataNasc": "2023-05-10",
-    "racaId": 1,
+    "raca": "Golden Retriever",
     "porte": "GRANDE",
     "sexo": "M",
-    "castrado": false
+    "castrado": false,
+    "usuarioId": 1
   }'
 ```
 
@@ -361,9 +397,12 @@ WHERE id_pet = 1;
 
 ---
 
-### 📌 Passo 4 — Criação de Tarefa de Cuidado (INSERT com relacionamento + JOIN)
+### 📌 Passo 5 — Criação de Tarefa de Cuidado (INSERT com relacionamento + JOIN)
+
+Crie uma tarefa de cuidado vinculada ao cuidador e ao pet:
 
 ```bash
+# POST /tarefas — Agendamento de tarefa com pontuação
 curl -X POST "$API_URL/tarefas" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -372,6 +411,8 @@ curl -X POST "$API_URL/tarefas" \
     "descricao": "Dose de reforço anual",
     "pontosTarefa": 50,
     "prazo": "2026-10-01T10:00:00",
+    "status": "PENDENTE",
+    "usuarioId": 1,
     "petId": 1
   }'
 ```
@@ -388,11 +429,16 @@ LIMIT 5;
 
 ---
 
-### 📌 Passo 5 — Conclusão de Tarefa (PATCH + SELECT)
+### 📌 Passo 6 — Conclusão de Tarefa (PATCH + SELECT)
+
+Marque a tarefa como concluída indicando o cuidador que executou a ação:
 
 ```bash
+# PATCH /tarefas/{id}/concluir — Conclusão da tarefa e crédito de pontuação
 curl -X PATCH "$API_URL/tarefas/1/concluir" \
-  -H "Authorization: Bearer $TOKEN"
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"concluinteId": 1}'
 ```
 
 **Consulta de confirmação no PostgreSQL:**
@@ -404,9 +450,12 @@ WHERE id_tarefa = 1;
 
 ---
 
-### 📌 Passo 6 — Remoção de Tarefa (DELETE + SELECT)
+### 📌 Passo 7 — Remoção de Tarefa (DELETE + SELECT)
+
+Remova a tarefa finalizada do sistema:
 
 ```bash
+# DELETE /tarefas/{id} — Exclusão lógica/física da tarefa
 curl -X DELETE "$API_URL/tarefas/1" \
   -H "Authorization: Bearer $TOKEN"
 ```
