@@ -17,9 +17,9 @@
 
 ---
 
-## 🔗 Repositório GitHub e Vídeo de Apresentação
+## 🔗 Repositório GitHub, Apresentação e Documentação
 
-[Repositório GitHub](https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing) | [Vídeo de Demonstração]()
+[Repositório GitHub](https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing) | [Vídeo de Demonstração](https://youtu.be/HO7DpSbPwM0) | [Documentação Oficial (PDF)](docs/Documenta%C3%A7%C3%A3o%20DevOps%20Sprint%203%20-%20Pet%20Guardian.pdf)
 
 ---
 
@@ -542,3 +542,10 @@ A interface interativa do Swagger UI está disponível no endpoint:
 | GET | `/trilhas` | Listar trilhas educativas disponíveis |
 | GET | `/modulos` | Listar módulos de uma trilha |
 | GET | `/aulas` | Listar aulas de um módulo |
+
+---
+
+## 📑 Documentação Complementar
+
+* 📄 **Documentação Completa da Sprint 3:** [Documentação DevOps Sprint 3 - Pet Guardian.pdf](docs/Documenta%C3%A7%C3%A3o%20DevOps%20Sprint%203%20-%20Pet%20Guardian.pdf)
+
