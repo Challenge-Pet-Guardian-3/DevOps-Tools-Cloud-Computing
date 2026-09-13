@@ -156,7 +156,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 ### Pré-requisitos
 
 * [Azure CLI](https://learn.microsoft.com/pt-br/cli/azure/install-azure-cli) instalado e autenticado (`az login`)
-* Terminal [Git Bash](https://gitforwindows.org/) (Windows) ou terminal bash (Linux / macOS)
+* Terminal [Git Bash](https://gitforwindows.org/) (Windows — obrigatório para execução correta dos scripts de deploy)
 * Assinatura Azure ativa com permissões para criação de recursos
 * *(Opcional)* [Docker Desktop](https://www.docker.com/products/docker-desktop/) — necessário apenas caso queira rodar o teste local com Docker Compose antes de ir para a nuvem. O deploy em nuvem não depende de Docker local.
 
