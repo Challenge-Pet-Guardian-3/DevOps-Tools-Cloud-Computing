@@ -21,6 +21,12 @@
 
 [Repositório GitHub](https://github.com/Challenge-Pet-Guardian-3/DevOps-Tools-Cloud-Computing) | [Vídeo de Demonstração](https://youtu.be/HO7DpSbPwM0) | [Documentação Oficial (PDF)](docs/Documenta%C3%A7%C3%A3o%20DevOps%20Sprint%203%20-%20Pet%20Guardian.pdf)
 
+## LEMBRETE: DESLIGUEI OS CONTAINERS NA AZURE PARA NÃO GERAR CUSTOS
+
+| ACI - API (Desligado) | ACI - Banco de Dados (Desligado) |
+| :---: | :---: |
+| ![api](docs/aci-api-petguardian-desligado.png) | ![db](docs/aci-db-petguardian-desligado.png) |
+
 ---
 
 ## 👥 Integrantes
